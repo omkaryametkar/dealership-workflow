@@ -35,16 +35,17 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 
 
+const db = mysql.createPool({
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
+  port: process.env.DB_PORT || 3306,
+  waitForConnections: true,
+  connectionLimit: 10,
+  queueLimit: 0
+});
 
-/* ------------ MYSQL CONNECTION ------------ */
-
-// const db = mysql.createPool({
-//   host: "localhost",
-//   user: "root",
-//   password: "root@123",
-//   database: "booking",
-//   connectionLimit: 10
-// });
 
 console.log("✅ MySQL Pool Connected");
 // ---------------- FILE UPLOAD CONFIG ----------------
@@ -4707,14 +4708,16 @@ app.post("/api/complete-refund", (req,res)=>{
 });
 app.get("/api/departments", (req, res) => {
   const sql = "SELECT DISTINCT department FROM users";
+
   db.query(sql, (err, result) => {
     if (err) {
-      console.error(err);
-      return res.status(500).json([]);
+      console.log("❌ SQL ERROR:", err);   // VERY IMPORTANT
+      return res.status(500).json({
+        error: err.message
+      });
     }
 
-    const depts = result.map(r => r.department);
-    res.json(depts);
+    res.json(result);
   });
 });
 app.post("/api/add-user", (req, res) => {
