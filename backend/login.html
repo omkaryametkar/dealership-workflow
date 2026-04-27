@@ -103,7 +103,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
   }
 
   try{
-    const res = await fetch("/login", {
+  const res = await fetch("https://dealership-workflow-production.up.railway.app/login", {
       method: "POST",
       headers: {"Content-Type": "application/json"},
       body: JSON.stringify({email, password, dept})
@@ -154,7 +154,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 });
 async function loadDepartments(){
   try{
-    const res = await fetch("/api/departments");
+   const res = await fetch("https://dealership-workflow-production.up.railway.app/api/departments");
     const data = await res.json();
 
     const deptSelect = document.getElementById("dept");
