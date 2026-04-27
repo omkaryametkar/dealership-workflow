@@ -6,7 +6,9 @@ const multer = require("multer");
 const PDFDocument = require("pdfkit");
 const app = express();
 const PORT = process.env.PORT || 3001;
-
+app.get("/", (req, res) => {
+  res.send("🚀 Dealership Backend is Running!");
+});
 
 /* ------------ MIDDLEWARE ------------ */
 app.use(cors());
@@ -5206,9 +5208,7 @@ app.get("/api/get-other-details/:customer_id/:booking_id", (req,res)=>{
 
 });
 
-app.get("/", (req, res) => {
-  res.send("🚀 Dealership Backend is Running!");
-});
+
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 
