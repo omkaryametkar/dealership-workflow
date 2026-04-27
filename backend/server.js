@@ -19,13 +19,13 @@ app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 /* ------------ MYSQL CONNECTION ------------ */
 
-const db = mysql.createPool({
-  host: "localhost",
-  user: "root",
-  password: "root@123",
-  database: "booking",
-  connectionLimit: 10
-});
+// const db = mysql.createPool({
+//   host: "localhost",
+//   user: "root",
+//   password: "root@123",
+//   database: "booking",
+//   connectionLimit: 10
+// });
 
 console.log("✅ MySQL Pool Connected");
 // ---------------- FILE UPLOAD CONFIG ----------------
