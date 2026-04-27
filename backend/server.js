@@ -7,12 +7,16 @@ const PDFDocument = require("pdfkit");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.get("/", (req, res) => {
-  res.send("🚀 Backend is running");
-});
+// ⬇️ PLACE THIS AT VERY END
+app.use(express.static(path.join(__dirname, "..")));
+// ⭐ allow browser to access uploaded files
 
 app.get("/api", (req, res) => {
   res.send("✅ API is working");
+});
+/* ------------ OPEN LOGIN PAGE ------------ */
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "../login.html"));
 });
 
 /* ------------ MIDDLEWARE ------------ */
@@ -54,10 +58,7 @@ const upload = multer({ storage: storage });
 app.use("/uploads", express.static("uploads"));
 
 
-/* ------------ OPEN LOGIN PAGE ------------ */
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../login.html"));
-});
+
 
 app.post("/login", (req, res) => {
   const { email, password, dept } = req.body;
@@ -2695,9 +2696,7 @@ app.get("/api/payment-receipts/:bookingId", (req, res) => {
   });
 
 });
-// ⬇️ PLACE THIS AT VERY END
-app.use(express.static(path.join(__dirname, "..")));
-// ⭐ allow browser to access uploaded files
+
 app.use("/uploads", express.static("uploads"));
 
 /* =======================================================
