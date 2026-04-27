@@ -154,7 +154,7 @@ document.getElementById("loginBtn").addEventListener("click", async () => {
 });
 async function loadDepartments(){
   try{
-   const res = await fetch("https://dealership-workflow-production.up.railway.app/api/departments");
+    const res = await fetch("https://dealership-workflow-production.up.railway.app/api/departments");
     const data = await res.json();
 
     const deptSelect = document.getElementById("dept");
@@ -162,8 +162,10 @@ async function loadDepartments(){
 
     data.forEach(d => {
       const option = document.createElement("option");
-      option.value = d;
-      option.textContent = d;
+
+      option.value = d.department;        // ✅ FIXED
+      option.textContent = d.department;  // ✅ FIXED
+
       deptSelect.appendChild(option);
     });
 
