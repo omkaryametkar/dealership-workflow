@@ -25,10 +25,7 @@ app.get("/api", (req, res) => {
   res.send("✅ API is working");
 });
 
-// ❗ 404 must be LAST
-app.use((req, res) => {
-  res.status(404).send("Not Found");
-});
+
 
 /* ------------ MIDDLEWARE ------------ */
 app.use(cors());
