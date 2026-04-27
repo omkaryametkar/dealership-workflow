@@ -986,6 +986,7 @@
 
 
 <script>
+  const BASE_URL = "https://dealership-workflow-production.up.railway.app";
   let exportData = [];
 let selectedDepartment = "";
 
@@ -998,7 +999,7 @@ function logout(){
 
 function loadDashboard(){
 
- fetch("http://localhost:3001/api/workflow-summary")
+ fetch(`${BASE_URL}/api/workflow-summary`)
   .then(res=>res.json())
   .then(res=>{
 
