@@ -6,8 +6,13 @@ const multer = require("multer");
 const PDFDocument = require("pdfkit");
 const app = express();
 const PORT = process.env.PORT || 3001;
+
 app.get("/", (req, res) => {
-  res.send("🚀 Dealership Backend is Running!");
+  res.send("🚀 Backend is running");
+});
+
+app.get("/api", (req, res) => {
+  res.send("✅ API is working");
 });
 
 /* ------------ MIDDLEWARE ------------ */
@@ -5207,7 +5212,9 @@ app.get("/api/get-other-details/:customer_id/:booking_id", (req,res)=>{
   });
 
 });
-
+app.use((req, res) => {
+  res.status(404).send("Not Found");
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
