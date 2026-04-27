@@ -5206,6 +5206,9 @@ app.get("/api/get-other-details/:customer_id/:booking_id", (req,res)=>{
 
 });
 
+const PORT = process.env.PORT || 3001;
+
 app.listen(PORT, () => {
-  console.log(`🚀 Server running at http://localhost:${PORT}`);
+  console.log(`Server running on port ${PORT}`);
+
 });
