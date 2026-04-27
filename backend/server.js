@@ -11,8 +11,20 @@ const PORT = process.env.PORT || 3001;
 app.use(express.static(path.join(__dirname, "..")));
 // ⭐ allow browser to access uploaded files
 
+const frontendPath = path.join(__dirname, "..");
+app.use(express.static(frontendPath));
+
+// 🔥 Root route → open login page
+app.get("/", (req, res) => {
+  res.sendFile(path.join(frontendPath, "login.html"));
+});
+
 app.get("/api", (req, res) => {
   res.send("✅ API is working");
+});
+// 🔥 Test route (for debugging)
+app.get("/test", (req, res) => {
+  res.send("Test route working");
 });
 /* ------------ OPEN LOGIN PAGE ------------ */
 app.get("/", (req, res) => {
@@ -5216,6 +5228,6 @@ app.use((req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`);
-
+  console.log("Server running on port " + PORT);
+  console.log("Serving frontend from:", frontendPath);
 });
