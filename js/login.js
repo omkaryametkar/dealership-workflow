@@ -1,0 +1,1 @@
+function login(){if(username.value&&password.value&&department.value){window.location=department.value}else{alert('Fill all fields')}}

@@ -1,0 +1,1772 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin Dashboard</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial, sans-serif;
+      background:linear-gradient(135deg,#eef2f7,#dfe9f3);
+    }
+
+    .header{
+      background:linear-gradient(90deg,#1e3c72,#2a5298);
+      color:pink;
+      padding:20px 30px;
+      font-size:22px;
+      font-weight:bold;
+      display:flex;
+      justify-content:center;
+      align-items:center;
+      box-shadow:0 4px 12px rgba(0,0,0,0.15);
+      letter-spacing:0.5px;
+    }
+
+    .logout-btn{
+      background:#ff4757;
+      color:white;
+      border:none;
+      padding:8px 15px;
+      border-radius:20px;
+      cursor:pointer;
+      font-weight:bold;
+      transition:0.3s ease;
+    }
+
+    .logout-btn:hover{
+      background:#e84118;
+      transform:scale(1.05);
+    }
+
+    .container{
+      padding:30px;
+    }
+
+    .grid{
+      display:grid;
+      grid-template-columns: repeat(auto-fit,minmax(220px,1fr));
+      gap:25px;
+      margin-bottom:30px;
+    }
+
+    .card{
+      background:white;
+      padding:25px;
+      border-radius:16px;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+      cursor:pointer;
+      transition:all 0.35s ease;
+      text-align:center;
+      position:relative;
+      overflow:hidden;
+    }
+
+    .card:hover{
+      transform:translateY(-8px);
+      box-shadow:0 15px 30px rgba(0,0,0,0.15);
+    }
+   #usersSection{
+  margin-right: 220px;
+  overflow-x: auto;
+}
+
+    /* subtle top gradient line */
+    .card::before{
+      content:"";
+      position:absolute;
+      top:0;
+      left:0;
+      width:100%;
+      height:5px;
+      background:linear-gradient(90deg,#0984e3,#6c5ce7,#00b894);
+    }
+
+    .count{
+      font-size:32px;
+      font-weight:bold;
+      color:#d63031;
+      margin-bottom:5px;
+    }
+
+    .tag{
+      margin-top:10px;
+      display:inline-block;
+      padding:6px 14px;
+      border-radius:20px;
+      font-size:12px;
+      color:white;
+      font-weight:bold;
+      letter-spacing:0.5px;
+      box-shadow:0 3px 8px rgba(0,0,0,0.15);
+    }
+
+    .sales{ background:#0984e3; }
+    .invoice{ background:#00b894; }
+    .insurance{ background:#6c5ce7; }
+    .rto{ background:#636e72; }
+    .delivery{ background:#fdcb6e; color:black; }
+
+    .summary{
+      margin:20px 0;
+      font-weight:bold;
+      font-size:16px;
+      background:white;
+      padding:12px 20px;
+      border-radius:10px;
+      box-shadow:0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    table{
+      width:100%;
+      border-collapse:collapse;
+      background:white;
+      border-radius:12px;
+      overflow:hidden;
+       max-width:100%;
+  table-layout: fixed;
+      box-shadow:0 6px 18px rgba(0,0,0,0.08);
+    }
+
+    th,td{
+      padding:12px;
+      border:1px solid #eee;
+      text-align:center;
+      font-size:14px;
+    }
+
+    th{
+      background:linear-gradient(90deg,#2d3436,#000000);
+      color:white;
+      letter-spacing:0.5px;
+    }
+
+    tr:hover{
+      background:#f1f2f6;
+      transition:0.2s;
+    }
+
+    .completed{ background:#d4edda; }
+    .delayed{ background:#f8d7da; }
+    .progress{ background:#fff3cd; }
+
+    .inner-row{
+      display:flex;
+      justify-content:space-around;
+      margin-top:18px;
+    }
+   .action-bar{
+  display:flex;
+  align-items:center;
+  gap:20px;
+}
+
+.action-buttons{
+  display:flex;
+  gap:12px;
+  margin-left:0;   /* ❌ remove auto push */
+}
+
+/* BUTTON BASE */
+.btn{
+  padding:10px 18px;
+  border:none;
+  border-radius:25px;
+  cursor:pointer;
+  font-weight:600;
+  font-size:14px;
+  transition:0.3s ease;
+  box-shadow:0 4px 10px rgba(0,0,0,0.1);
+}
+
+/* BUTTON VARIANTS */
+.btn-users{
+  background:linear-gradient(90deg,#6c5ce7,#0984e3);
+  color:white;
+}
+
+.btn-users:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+.btn-add{
+  background:linear-gradient(90deg,#00b894,#55efc4);
+  color:white;
+}
+
+.btn-add:hover{
+  transform:translateY(-2px);
+}
+
+.btn-back{
+  background:#dfe6e9;
+}
+
+.btn-back:hover{
+  background:#b2bec3;
+}
+
+    .inner-row div{
+      cursor:pointer;
+      padding:6px 10px;
+      border-radius:8px;
+      transition:0.3s;
+    }
+
+    .inner-row div:hover{
+      background:#f1f2f6;
+      transform:scale(1.05);
+    }
+
+
+    .inner-row strong{
+      font-size:20px;
+      display:block;
+      margin-bottom:3px;
+    }
+   /* MODAL BACKGROUND */
+.modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.5);
+  backdrop-filter: blur(6px);
+  justify-content:center;
+  align-items:center;
+  z-index:1000;
+}
+
+/* MODAL BOX */
+.modal-content{
+  background:#ffffff;
+  padding:35px 30px;
+  border-radius:18px;
+  width:480px;
+  max-width:95%;
+  box-shadow:0 20px 50px rgba(0,0,0,0.25);
+  animation:fadeIn 0.35s ease;
+}
+
+/* TITLE */
+.modal-content h2{
+  margin-bottom:20px;
+  text-align:left;
+  font-size:22px;
+  font-weight:700;
+  color:#2d3436;
+}
+
+/* INPUT GROUP */
+.form-group{
+  margin-bottom:15px;
+}
+
+.form-group label{
+  display:block;
+  font-size:13px;
+  margin-bottom:5px;
+  color:#636e72;
+  font-weight:600;
+}
+.action-btn{
+  border:none;
+  padding:6px 10px;
+  margin:2px;
+  border-radius:8px;
+  cursor:pointer;
+  font-size:12px;
+  font-weight:600;
+  transition:0.2s;
+}
+
+
+.edit-btn{
+  background:#0984e3;
+  color:white;
+}
+
+.edit-btn:hover{
+  background:#0652DD;
+}
+
+
+.delete-btn{
+  background:#d63031;
+  color:white;
+}
+
+.delete-btn:hover{
+  background:#b71c1c;
+}
+#usersTable{
+  width: 100%;
+  max-width: 100%;
+  table-layout: fixed;
+}
+#usersSection{
+  overflow-x: auto;
+}
+
+
+.modal-content input,
+.modal-content select{
+  width:100%;
+  padding:12px 14px;
+  border-radius:10px;
+  border:1px solid #dfe6e9;
+  font-size:14px;
+  transition:0.3s;
+  background:#f9fbfd;
+}
+
+.modal-content input:focus,
+.modal-content select:focus{
+  border-color:#0984e3;
+  background:white;
+  outline:none;
+  box-shadow:0 0 0 3px rgba(9,132,227,0.15);
+}
+
+
+.modal-actions{
+  display:flex;
+  justify-content:flex-end;
+  gap:12px;
+  margin-top:20px;
+}
+
+.modal-actions .btn{
+  padding:10px 18px;
+  border-radius:25px;
+  font-size:14px;
+}
+
+
+.primary{
+  background:linear-gradient(90deg,#0984e3,#6c5ce7);
+  color:white;
+}
+.sidebar{
+  position:fixed;
+  right:0;
+  top:0;
+  width:220px;
+  height:100%;
+  background:#0f172a;
+  padding-top:80px;
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+
+.sidebar button{
+  background:#1e293b;
+  color:white;
+  border:none;
+  padding:12px;
+  margin:0 10px;
+  border-radius:10px;
+  cursor:pointer;
+  text-align:left;
+  font-size:14px;
+  transition:0.3s;
+}
+
+.sidebar button:hover{
+  background:#334155;
+}
+
+.primary:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+
+
+.cancel{
+  background:#ecf0f1;
+}
+
+.cancel:hover{
+  background:#dcdde1;
+}
+
+
+@keyframes fadeIn{
+  from{ transform:translateY(20px); opacity:0; }
+  to{ transform:translateY(0); opacity:1; }
+}
+
+    .inner-row p{
+      margin:0;
+      font-size:12px;
+      color:#555;
+    }
+    .container{
+  padding:30px;
+  margin-right:220px; 
+}
+#dataTable{
+  display:block;
+  overflow-x:auto;
+}
+
+    
+    ::-webkit-scrollbar {
+      width:8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background:#f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background:#888;
+      border-radius:10px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background:#555;
+    }
+.main-content{
+  margin-right: 220px;   
+  padding: 20px;
+}
+.booking::before{
+  background: linear-gradient(90deg,light blue);
+}
+
+
+.btn-filter{
+  background:linear-gradient(90deg,#f39c12,#f1c40f);
+  color:white;
+}
+
+.btn-filter:hover{
+  transform:translateY(-2px);
+}
+
+
+.btn-download{
+  background:linear-gradient(90deg,#00b894,#00cec9);
+  color:white;
+}
+
+.btn-download:hover{
+  transform:translateY(-2px);
+  box-shadow:0 8px 20px rgba(0,0,0,0.2);
+}
+.logout-side{
+  background:#dc2626;
+  color:white;
+}
+
+.logout-side:hover{
+  background:#b91c1c;
+}
+
+#salesFilter{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin-top:15px;
+  background:white;
+  padding:10px 15px;
+  border-radius:12px;
+  box-shadow:0 4px 12px rgba(0,0,0,0.08);
+  width:fit-content;
+}
+
+
+#salesFilter select{
+  padding:8px 14px;
+  border-radius:20px;
+  border:1px solid #dfe6e9;
+  background:#f9fbfd;
+  font-size:14px;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+#salesFilter select:hover{
+  border-color:#0984e3;
+}
+
+#salesFilter select:focus{
+  outline:none;
+  border-color:#0984e3;
+  box-shadow:0 0 0 3px rgba(9,132,227,0.2);
+}
+
+
+#salesFilter button{
+  padding:8px 16px;
+  border:none;
+  border-radius:20px;
+  background:linear-gradient(90deg,#ff7a18,#ffb347);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+  transition:0.3s;
+}
+
+#salesFilter button:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 15px rgba(0,0,0,0.2);
+}
+
+
+.btn-filter{
+  background:linear-gradient(90deg,#0984e3,#6c5ce7);
+  color:white;
+  border:none;
+  padding:8px 18px;
+  border-radius:25px;
+  cursor:pointer;
+  font-weight:600;
+  transition:0.3s;
+}
+
+.btn-filter:hover{
+  transform:translateY(-2px);
+  box-shadow:0 6px 15px rgba(0,0,0,0.2);
+}
+</style>
+</head>
+
+<body>
+<div class="sidebar">
+  <button onclick="showDashboard()">🏠 Dashboard</button>
+  <button onclick="showUsers()">👤 Users</button>
+  <button onclick="showBranches()">🏢 Branch</button>
+  <button onclick="showExport()">📥 Export </button>
+
+  <button onclick="showTopRated()">⭐ Top Rated Model</button>
+
+  <button onclick="logout()" class="logout-side">🚪 Logout</button>
+</div>
+<div class="header">
+  Admin Dashboard
+  
+</div>
+
+<div class="container">
+
+  <div class="grid">
+
+
+  <div class="card">
+    <h3>SALES</h3>
+    <div class="inner-row">
+      <div onclick="loadDepartment('Sales', null)">
+        <strong id="salesTotal">0</strong>
+        <p>Total</p>
+      </div>
+
+      <div onclick="loadDepartment('Sales','Delayed')">
+        <strong id="salesDelayed">0</strong>
+        <p>Delayed</p>
+      </div>
+
+      <div onclick="loadDepartment('Sales','In Progress')">
+        <strong id="salesProgress">0</strong>
+        <p>Progress</p>
+      </div>
+    </div>
+  </div>
+
+ 
+
+
+  
+<div class="card">
+  <h3>ACCOUNTS</h3>
+
+  <div class="inner-row">
+
+  <div onclick="loadDepartment('Accounts','In Progress')">
+      <strong id="accountsPending">0</strong>
+      <p>Pending</p>
+    </div>
+
+    <div onclick="loadDepartment('Accounts','Due')">
+      <strong id="accountsDue">0</strong>
+      <p>Due</p>
+    </div>
+
+    <div onclick="loadDepartment('Accounts','Refund')">
+      <strong id="accountsRefund">0</strong>
+      <p>Refund</p>
+    </div>
+
+  </div>
+</div>
+
+
+<div class="card vehicleallotment">
+  <h3>VEHICLE ALLOTMENT</h3>
+  <div class="inner-row">
+    <div onclick="loadDepartment('VehicleAllotment', null)">
+      <strong id="vehicleallotmentTotal">0</strong>
+      <p>Total</p>
+    </div>
+
+    <div onclick="loadDepartment('VehicleAllotment','Delayed')">
+      <strong id="vehicleallotmentDelayed">0</strong>
+      <p>Delayed</p>
+    </div>
+
+    <div onclick="loadDepartment('VehicleAllotment','In Progress')">
+      <strong id="vehicleallotmentProgress">0</strong>
+      <p>Progress</p>
+    </div>
+  </div>
+</div>
+
+
+  <div class="card">
+    <h3>INVOICE</h3>
+    <div class="inner-row">
+      <div onclick="loadDepartment('Invoice', null)">
+        <strong id="invoiceTotal">0</strong>
+        <p>Total</p>
+      </div>
+
+      <div onclick="loadDepartment('Invoice','Delayed')">
+        <strong id="invoiceDelayed">0</strong>
+        <p>Delayed</p>
+      </div>
+
+      <div onclick="loadDepartment('Invoice','In Progress')">
+        <strong id="invoiceProgress">0</strong>
+        <p>Progress</p>
+      </div>
+    </div>
+  </div>
+
+ 
+  <div class="card">
+    <h3>INSURANCE</h3>
+    <div class="inner-row">
+      <div onclick="loadDepartment('Insurance', null)">
+        <strong id="insuranceTotal">0</strong>
+        <p>Total</p>
+      </div>
+
+      <div onclick="loadDepartment('Insurance','Delayed')">
+        <strong id="insuranceDelayed">0</strong>
+        <p>Delayed</p>
+      </div>
+
+      <div onclick="loadDepartment('Insurance','In Progress')">
+        <strong id="insuranceProgress">0</strong>
+        <p>Progress</p>
+      </div>
+    </div>
+  </div>
+
+
+  <div class="card">
+    <h3>RTO</h3>
+    <div class="inner-row">
+      <div onclick="loadDepartment('RTO', null)">
+        <strong id="rtoTotal">0</strong>
+        <p>Total</p>
+      </div>
+
+      <div onclick="loadDepartment('RTO','Delayed')">
+        <strong id="rtoDelayed">0</strong>
+        <p>Delayed</p>
+      </div>
+
+      <div onclick="loadDepartment('RTO','In Progress')">
+        <strong id="rtoProgress">0</strong>
+        <p>Progress</p>
+      </div>
+    </div>
+  </div>
+
+
+<div class="card">
+  <h3>FASTAG</h3>
+  <div class="inner-row">
+    <div onclick="loadDepartment('Fastag', null)">
+      <strong id="fastagTotal">0</strong>
+      <p>Total</p>
+    </div>
+
+    <div onclick="loadDepartment('Fastag','Delayed')">
+      <strong id="fastagDelayed">0</strong>
+      <p>Delayed</p>
+    </div>
+
+    <div onclick="loadDepartment('Fastag','In Progress')">
+      <strong id="fastagProgress">0</strong>
+      <p>Progress</p>
+    </div>
+  </div>
+</div>
+
+
+
+<div class="card">
+  <h3>ACCESSORIES</h3>
+
+  <div class="inner-row">
+
+    <div onclick="loadDepartment('Accessories','In Progress')">
+      <strong id="accessoriesPending">0</strong>
+      <p>Pending</p>
+    </div>
+
+    <div onclick="loadDepartment('Accessories','Completed')">
+      <strong id="accessoriesCompleted">0</strong>
+      <p>Completed</p>
+    </div>
+
+  </div>
+</div>
+
+ 
+  <div class="card">
+    <h3>DELIVERY</h3>
+    <div class="inner-row">
+      <div onclick="loadDepartment('Delivery', null)">
+        <strong id="deliveryTotal">0</strong>
+        <p>Total</p>
+      </div>
+
+      <div onclick="loadDepartment('Delivery','Delayed')">
+        <strong id="deliveryDelayed">0</strong>
+        <p>Delayed</p>
+      </div>
+
+      <div onclick="loadDepartment('Delivery','In Progress')">
+        <strong id="deliveryProgress">0</strong>
+        <p>Progress</p>
+      </div>
+    </div>
+  </div>
+
+ 
+<div class="card booking">
+
+  <h3>BOOKING CANCELLED</h3>
+
+  <div class="inner-row">
+
+    <div onclick="loadDepartment('BookingCancelled','Completed')">
+      <strong id="bookingCancelledCompleted">0</strong>
+      <p>Completed</p>
+    </div>
+
+    <div onclick="loadDepartment('BookingCancelled','In Progress')">
+      <strong id="bookingCancelledProgress">0</strong>
+      <p>Progress</p>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+<div id="summary" class="summary" style="display:none;"></div>
+
+<table id="dataTable" style="display:none;">
+    <thead>
+      <tr>
+        <th>Customer ID</th>
+        <th>Booking ID</th>
+        <th>Start Time</th>
+        <th>End Time</th>
+        <th>TAT (Days)</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+ <div id="usersSection" class="main-content" style="display:none;">
+  <div class="action-bar">
+  <h2>User Management</h2>
+
+  <div class="action-buttons">
+    <button class="btn btn-add" onclick="openAddUser()">+ Add User</button>
+    <button class="btn btn-back" onclick="goBack()">⬅ Back</button>
+  </div>
+</div>
+
+  <table border="1" width="100%" id="usersTable">
+    <thead>
+      <tr>
+<th>ID</th>
+<th>Name</th>
+<th>Email</th>
+<th>Department</th>
+<th>Branch</th>  
+<th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+<div id="addUserModal" class="modal">
+
+  <div class="modal-content">
+
+    <h2>Add New User</h2>
+
+    <div class="form-group">
+      <label>Full Name</label>
+      <input id="name" placeholder="Enter full name">
+    </div>
+
+    <div class="form-group">
+      <label>Email Address</label>
+      <input id="emailUser" placeholder="Enter email">
+    </div>
+
+    <div class="form-group">
+      <label>Password</label>
+      <input id="passwordUser" type="password" placeholder="Enter password">
+    </div>
+
+  
+
+    <div class="form-group">
+      <label>Department</label>
+      <input id="departmentUser" placeholder="Enter department">
+    </div>
+    <div class="form-group">
+  <label>Branch</label>
+  <input id="branchUser" placeholder="Enter branch (location)">
+</div>
+
+    <div class="modal-actions">
+      <button class="btn cancel" onclick="closeAddUser()">Cancel</button>
+      <button class="btn primary" onclick="addUser()">Add User</button>
+    </div>
+
+  </div>
+
+</div>
+
+
+<div id="branchSection" class="main-content" style="display:none;">
+
+  <div class="action-bar">
+    <h2>Branch Management</h2>
+
+    <div class="action-buttons">
+      <button class="btn btn-add" onclick="openAddBranch()">+ Add Branch</button>
+      <button class="btn btn-back" onclick="goBack()">⬅ Back</button>
+    </div>
+  </div>
+
+  <table border="1" width="100%" id="branchTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Branch Name</th>
+        <th>Address</th>
+        <th>Action</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+</div>
+
+
+<div id="addBranchModal" class="modal">
+  <div class="modal-content">
+
+    <h2>Add New Branch</h2>
+
+    <div class="form-group">
+      <label>Branch Name</label>
+      <input id="branchName" placeholder="Enter branch name">
+    </div>
+
+    <div class="form-group">
+      <label>Address</label>
+      <input id="branchAddress" placeholder="Enter branch address">
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn cancel" onclick="closeAddBranch()">Cancel</button>
+      <button class="btn primary" onclick="addBranch()">Save Branch</button>
+    </div>
+
+  </div>
+</div>
+
+<div id="exportSection" class="main-content" style="display:none;">
+
+  <h2>Export Department Data</h2>
+
+  <div id="exportGrid" class="grid"></div>
+
+  <div id="exportTableContainer" style="display:none; margin-top:20px;">
+   <h3 id="exportTitle" style="margin-bottom:10px;"></h3>
+
+<div style="display:flex; gap:10px; align-items:center; margin-bottom:10px;">
+
+  <select id="filterType" class="btn">
+    <option value="all">All</option>
+    <option value="week">This Week</option>
+    <option value="month">This Month</option>
+    <option value="year">This Year</option>
+  </select>
+
+  <button class="btn btn-filter" onclick="applyFilter()">Apply Filter</button>
+
+  <button class="btn btn-download" onclick="downloadCSV()">⬇ Download CSV</button>
+
+</div>
+
+
+    <table id="exportTable">
+      <thead>
+        <tr>
+          <th>Customer ID</th>
+          <th>Booking ID</th>
+          <th>Department</th>
+          <th>Status</th>
+          <th>Start Time</th>
+          <th>End Time</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+  </div>
+ 
+  
+</div>
+
+</div>
+<div id="topRatedSection" class="main-content" style="display:none;">
+
+  <h2>Top Rated Model</h2>
+
+  
+  <button class="btn btn-filter" onclick="loadSales()">Sales</button>
+
+ 
+  <div id="salesFilter" style="display:none; margin-top:10px;">
+    <select id="salesFilterType">
+      <option value="week">This Week</option>
+      <option value="month">This Month</option>
+      <option value="year">This Year</option>
+    </select>
+
+    <button onclick="applySalesFilter()">Apply</button>
+  </div>
+
+  
+  <div id="topDescription" style="margin-top:15px; font-weight:bold;"></div>
+
+ 
+  <table border="1" width="100%" style="margin-top:10px;">
+    <thead>
+      <tr>
+        <th>Vehicle Model</th>
+        <th>Sales Count</th>
+      </tr>
+    </thead>
+    <tbody id="salesTable"></tbody>
+  </table>
+
+</div>
+
+
+<script>
+  let exportData = [];
+let selectedDepartment = "";
+
+
+function logout(){
+  localStorage.removeItem("loggedIn");
+  window.location.href="login.html";
+}
+
+
+function loadDashboard(){
+
+ fetch("http://localhost:3001/api/workflow-summary")
+  .then(res=>res.json())
+  .then(res=>{
+
+    const s = res.summary;
+
+    document.getElementById("salesTotal").innerText = s.Sales.total;
+    document.getElementById("salesDelayed").innerText = s.Sales.delayed;
+    document.getElementById("salesProgress").innerText = s.Sales.progress;
+
+    document.getElementById("accountsPending").innerText = s.Accounts.pending;
+    document.getElementById("accountsDue").innerText = s.Accounts.due;
+    document.getElementById("accountsRefund").innerText = s.Accounts.refund;
+
+    document.getElementById("vehicleallotmentTotal").innerText = s.VehicleAllotment.total;
+    document.getElementById("vehicleallotmentDelayed").innerText = s.VehicleAllotment.delayed;
+    document.getElementById("vehicleallotmentProgress").innerText = s.VehicleAllotment.progress;
+
+    document.getElementById("invoiceTotal").innerText = s.Invoice.total;
+    document.getElementById("invoiceDelayed").innerText = s.Invoice.delayed;
+    document.getElementById("invoiceProgress").innerText = s.Invoice.progress;
+
+    document.getElementById("insuranceTotal").innerText = s.Insurance.total;
+    document.getElementById("insuranceDelayed").innerText = s.Insurance.delayed;
+    document.getElementById("insuranceProgress").innerText = s.Insurance.progress;
+
+    document.getElementById("rtoTotal").innerText = s.RTO.total;
+    document.getElementById("rtoDelayed").innerText = s.RTO.delayed;
+    document.getElementById("rtoProgress").innerText = s.RTO.progress;
+
+    document.getElementById("fastagTotal").innerText = s.Fastag?.total || 0;
+    document.getElementById("fastagDelayed").innerText = s.Fastag?.delayed || 0;
+    document.getElementById("fastagProgress").innerText = s.Fastag?.progress || 0;
+
+    document.getElementById("accessoriesPending").innerText = s.Accessories.pending;
+    document.getElementById("accessoriesCompleted").innerText = s.Accessories.completed;
+
+    document.getElementById("deliveryTotal").innerText = s.Delivery.total;
+    document.getElementById("deliveryDelayed").innerText = s.Delivery.delayed;
+    document.getElementById("deliveryProgress").innerText = s.Delivery.progress;
+
+    document.getElementById("bookingCancelledCompleted").innerText =
+  s.BookingCancelled?.completed || 0;
+
+    document.getElementById("bookingCancelledProgress").innerText =
+  s.BookingCancelled?.progress || 0;
+
+  })
+  .catch(err=>{
+    console.error("Dashboard Load Error:", err);
+  });
+}
+function goBack(){
+ 
+  document.querySelector(".grid").style.display = "grid";
+  document.getElementById("summary").style.display = "block";
+
+  
+  document.getElementById("usersSection").style.display = "none";
+  document.getElementById("branchSection").style.display = "none";
+  document.getElementById("exportSection").style.display = "none";
+  document.getElementById("dataTable").style.display = "none";
+}
+
+function loadDepartment(dept, status = null){
+
+ fetch("http://localhost:3001/api/workflow-summary")
+  .then(res=>res.json())
+  .then(res=>{
+    const s = res.summary;
+
+
+document.getElementById("salesTotal").innerText = s.Sales.total;
+document.getElementById("salesDelayed").innerText = s.Sales.delayed;
+document.getElementById("salesProgress").innerText = s.Sales.progress;
+
+
+document.getElementById("accountsPending").innerText = s.Accounts.pending;
+document.getElementById("accountsDue").innerText = s.Accounts.due;
+document.getElementById("accountsRefund").innerText = s.Accounts.refund;
+
+document.getElementById("vehicleallotmentTotal").innerText = s.VehicleAllotment.total;
+document.getElementById("vehicleallotmentDelayed").innerText = s.VehicleAllotment.delayed;
+document.getElementById("vehicleallotmentProgress").innerText = s.VehicleAllotment.progress;
+
+
+document.getElementById("invoiceTotal").innerText = s.Invoice.total;
+document.getElementById("invoiceDelayed").innerText = s.Invoice.delayed;
+document.getElementById("invoiceProgress").innerText = s.Invoice.progress;
+
+
+document.getElementById("insuranceTotal").innerText = s.Insurance.total;
+document.getElementById("insuranceDelayed").innerText = s.Insurance.delayed;
+document.getElementById("insuranceProgress").innerText = s.Insurance.progress;
+
+
+document.getElementById("rtoTotal").innerText = s.RTO.total;
+document.getElementById("rtoDelayed").innerText = s.RTO.delayed;
+document.getElementById("rtoProgress").innerText = s.RTO.progress;
+
+
+document.getElementById("accessoriesPending").innerText = s.Accessories.pending;
+document.getElementById("accessoriesCompleted").innerText = s.Accessories.completed;
+
+
+document.getElementById("deliveryTotal").innerText = s.Delivery.total;
+document.getElementById("deliveryDelayed").innerText = s.Delivery.delayed;
+document.getElementById("deliveryProgress").innerText = s.Delivery.progress;
+
+    const data = res.table;
+
+    const table = document.getElementById("dataTable");
+    const tbody = table.querySelector("tbody");
+
+    tbody.innerHTML="";
+    table.style.display="table";
+    document.getElementById("summary").style.display = "block";
+document.getElementById("dataTable").style.display = "table";
+let filtered = data.filter(row =>
+  row.department &&
+  row.department.toLowerCase() === dept.toLowerCase()
+);
+    
+
+ if(status){
+  filtered = filtered.filter(row => 
+    row.status && row.status.toLowerCase() === status.toLowerCase()
+  );
+}
+
+
+
+    let total = filtered.length;
+    let completed = 0;
+    let delayed = 0;
+    let progress = 0;
+
+    filtered.forEach(row=>{
+
+      let rowStatus = row.status;
+ 
+
+  if(rowStatus === "Clear"){
+    rowStatus = "Completed";
+  }
+      let rowClass="";
+
+     if(rowStatus === "Delayed"){
+  rowClass="delayed";
+  delayed++;
+}
+else if(rowStatus === "In Progress"){
+  rowClass="progress";
+  progress++;
+}
+else if(rowStatus === "Completed"){
+  rowClass="completed";
+  completed++;
+}
+else{
+  rowClass="progress";   
+}
+
+      const tr=document.createElement("tr");
+      tr.className=rowClass;
+
+      tr.innerHTML=`
+        <td>${row.customer_id}</td>
+        <td>${row.booking_id}</td>
+        <td>${formatDate(row.start_time)}</td>
+        <td>${row.end_time ? formatDate(row.end_time) : "-"}</td>
+       <td>
+  ${
+    row.start_time && row.end_time
+      ? ((new Date(row.end_time) - new Date(row.start_time)) / (1000 * 60 * 60 * 24)).toFixed(2)
+      : "-"
+  }
+</td>
+        <td>${rowStatus}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("summary").innerHTML =
+      `Department: ${dept} |
+       Total: ${total} |
+       Completed: ${completed} |
+       Delayed: ${delayed} |
+       In Progress: ${progress}`;
+  })
+  .catch(err=>{
+    console.error("Department Load Error:", err);
+  });
+}
+
+function formatDate(dateStr){
+  if(!dateStr) return "-";
+  return new Date(dateStr).toLocaleString();
+}
+function startDepartment(customerId, bookingId, department){
+
+  fetch("http://localhost:3001/api/start-department", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      customer_id: customerId,
+      booking_id: bookingId,
+      department: department
+    })
+  })
+  .then(res => res.json())
+  .then(data => {
+    console.log(data);
+    alert("Department Started Successfully");
+
+    loadDepartment("Sales");
+  })
+  .catch(err => {
+    console.error(err);
+  });
+}
+function endDepartment(customerId, bookingId, department){
+
+fetch("http://localhost:3001/api/end-department",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+customer_id:customerId,
+booking_id:bookingId,
+department:department
+})
+})
+.then(res=>res.json())
+.then(data=>{
+alert(data.message);
+loadDashboard();
+})
+.catch(err=>{
+console.error(err);
+});
+
+}
+loadDashboard();
+
+function openAddUser(){
+  document.getElementById("addUserModal").style.display = "flex";
+}
+
+function closeAddUser(){
+  document.getElementById("addUserModal").style.display = "none";
+}
+
+
+function loadUsers(){
+  fetch("http://localhost:3001/api/users")
+  .then(res => res.json())
+  .then(data => {
+
+    console.log("Users:", data); 
+
+    const tbody = document.querySelector("#usersTable tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(u => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = `
+        <td>${u.id}</td>
+        <td>${u.name}</td>
+        <td>${u.email}</td>
+      <td>${u.department || "-"}</td>
+      <td>${u.branch || "-"}</td>
+        <td>
+    <button class="action-btn edit-btn" onclick='editUser(${u.id},
+  ${JSON.stringify(u.name)},
+  ${JSON.stringify(u.email)},
+  ${JSON.stringify(u.department || "")},
+  ${JSON.stringify(u.branch || "")}
+)'>
+      ✏️ Edit
+    </button>
+
+    <button class="action-btn delete-btn" onclick="deleteUser(${u.id})">
+      🗑 Delete
+    </button>
+  </td>
+      `;
+      tbody.appendChild(tr);
+    });
+  })
+  .catch(err=>{
+    console.error("User Load Error:", err);
+  });
+}
+function addUser(){
+
+  const name = document.getElementById("name").value.trim();
+  const email = document.getElementById("emailUser").value.trim();
+  const password = document.getElementById("passwordUser").value.trim();
+  const department = document.getElementById("departmentUser").value.trim();
+  const branch = document.getElementById("branchUser").value.trim();
+  
+  
+
+  if(!name || !email){
+    alert("Please fill required fields");
+    return;
+  }
+
+
+
+ 
+  if(window.editUserId){
+
+    fetch(`http://localhost:3001/api/update-user/${window.editUserId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, email, department, branch })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert("User Updated Successfully");
+      closeAddUser();
+      loadUsers();
+      window.editUserId = null;
+    });
+
+  } 
+  else {
+  
+    if(!password){
+      alert("Password required for new user");
+      return;
+    }
+
+    fetch("http://localhost:3001/api/add-user", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+     body: JSON.stringify({ name, email, password, department, branch })
+    })
+    .then(res => res.json())
+    .then(data => {
+      alert("User Added Successfully");
+      closeAddUser();
+      loadUsers();
+    });
+  }
+}
+function showUsers(){
+  hideAllSections(); 
+  document.getElementById("usersSection").style.display = "block";
+
+  loadUsers();
+}
+function deleteUser(id){
+
+  if(!confirm("Are you sure you want to delete this user?")) return;
+
+  fetch(`http://localhost:3001/api/delete-user/${id}`, {
+    method: "DELETE"
+  })
+  .then(res => res.json())
+  .then(data => {
+    alert("User Deleted Successfully");
+    loadUsers(); 
+  })
+  .catch(err => {
+    console.error(err);
+    alert("Error deleting user");
+  });
+}
+function editUser(id, name, email, department, branch){
+
+  openAddUser(); 
+
+  document.getElementById("name").value = name;
+  document.getElementById("emailUser").value = email;
+  document.getElementById("passwordUser").value = ""; 
+  document.getElementById("departmentUser").value = department;
+document.getElementById("branchUser").value = branch;
+
+  
+  window.editUserId = id;
+}
+function showDashboard(){
+  hideAllSections();  
+
+  document.querySelector(".grid").style.display = "grid";
+  document.getElementById("summary").style.display = "block";
+}
+
+function showBranches(){
+   hideAllSections();
+
+  document.getElementById("branchSection").style.display = "block";
+
+  loadBranches();
+}
+
+function openAddBranch(){
+  document.getElementById("addBranchModal").style.display = "flex";
+}
+
+function closeAddBranch(){
+  document.getElementById("addBranchModal").style.display = "none";
+}
+
+function loadBranches(){
+  fetch("http://localhost:3001/api/branches")
+  .then(res => res.json())
+  .then(data => {
+
+    const tbody = document.querySelector("#branchTable tbody");
+    tbody.innerHTML = "";
+
+    data.forEach(b => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${b.id}</td>
+        <td>${b.name}</td>
+        <td>${b.address}</td>
+        <td>
+          <button class="action-btn edit-btn" onclick='editBranch(${b.id}, ${JSON.stringify(b.name)}, ${JSON.stringify(b.address)})'>
+      ✏️ Edit
+    </button>
+          <button class="action-btn delete-btn" onclick="deleteBranch(${b.id})">
+            Delete
+          </button>
+        </td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  });
+}
+
+function addBranch(){
+
+  const name = document.getElementById("branchName").value.trim();
+  const address = document.getElementById("branchAddress").value.trim();
+
+  if(!name){
+    alert("Branch name required");
+    return;
+  }
+
+  
+  if(window.editBranchId){
+
+    fetch(`http://localhost:3001/api/update-branch/${window.editBranchId}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, address })
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert("Branch Updated Successfully");
+      closeAddBranch();
+      loadBranches();
+      window.editBranchId = null;
+    });
+
+  } 
+  else {
+    
+    fetch("http://localhost:3001/api/add-branch", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ name, address })
+    })
+    .then(res => res.json())
+    .then(() => {
+      alert("Branch Added Successfully");
+      closeAddBranch();
+      loadBranches();
+    });
+  }
+}
+
+function deleteBranch(id){
+
+  if(!confirm("Delete this branch?")) return;
+
+  fetch(`http://localhost:3001/api/delete-branch/${id}`, {
+    method: "DELETE"
+  })
+  .then(res => res.json())
+  .then(() => {
+    alert("Branch Deleted");
+    loadBranches();
+  });
+}
+function editBranch(id, name, address){
+
+  openAddBranch(); 
+  document.getElementById("branchName").value = name;
+  document.getElementById("branchAddress").value = address;
+
+  window.editBranchId = id; 
+}
+
+function showExport(){
+  hideAllSections();  // 🔥 ADD THIS
+
+  document.getElementById("exportSection").style.display = "block";
+  loadExportDepartments();
+}
+function loadExportDepartments(){
+
+  fetch("http://localhost:3001/api/workflow-summary")
+  .then(res => res.json())
+  .then(res => {
+
+    exportData = res.table;
+
+    const departments = [
+      "Sales",
+      "Accounts",
+      "VehicleAllotment",
+      "Invoice",
+      "Insurance",
+      "RTO",
+      "Fastag",  
+      "Accessories",
+      "Delivery"
+    ];
+
+    const grid = document.getElementById("exportGrid");
+    grid.innerHTML = "";
+
+    departments.forEach(dept => {
+
+      const div = document.createElement("div");
+      div.className = "card";
+      div.innerHTML = `<h3>${dept}</h3>`;
+
+      div.onclick = () => loadExportTable(dept);
+
+      grid.appendChild(div);
+    });
+
+  });
+}
+
+function loadExportTable(dept){
+
+  selectedDepartment = dept;
+document.getElementById("exportTitle").innerText = dept + " Details";
+
+  const tbody = document.querySelector("#exportTable tbody");
+  tbody.innerHTML = "";
+
+  const filtered = exportData.filter(row =>
+    row.department &&
+    row.department.toLowerCase() === dept.toLowerCase()
+  );
+
+  filtered.forEach(row => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${row.customer_id}</td>
+      <td>${row.booking_id}</td>
+      <td>${row.department}</td>
+      <td>${row.status}</td>
+      <td>${formatDate(row.start_time)}</td>
+      <td>${row.end_time ? formatDate(row.end_time) : "-"}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById("exportTableContainer").style.display = "block";
+}
+function downloadCSV(){
+
+  const dataToDownload = filteredExportData.length > 0
+    ? filteredExportData
+    : exportData.filter(row =>
+        row.department &&
+        row.department.toLowerCase() === selectedDepartment.toLowerCase()
+      );
+
+  if(dataToDownload.length === 0){
+    alert("No data to export");
+    return;
+  }
+
+  let csv = "Customer ID,Booking ID,Department,Status,Start Time,End Time\n";
+
+  dataToDownload.forEach(row => {
+    csv += `${row.customer_id},${row.booking_id},${row.department},${row.status},${row.start_time || ""},${row.end_time || ""}\n`;
+  });
+
+  const blob = new Blob([csv], { type: "text/csv" });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = selectedDepartment + ".csv";
+  a.click();
+
+  window.URL.revokeObjectURL(url);
+}
+function applyFilter(){
+
+  document.getElementById("exportTitle").innerText = selectedDepartment + " Details";
+
+  const type = document.getElementById("filterType").value;
+  const now = new Date();
+
+  const tbody = document.querySelector("#exportTable tbody");
+  tbody.innerHTML = "";
+
+  const filtered = exportData.filter(row => {
+
+    if(!row.start_time) return false;
+
+    const date = new Date(row.start_time);
+
+    if(row.department.toLowerCase() !== selectedDepartment.toLowerCase()){
+      return false;
+    }
+
+    if(type === "week"){
+      const firstDay = new Date();
+      firstDay.setDate(now.getDate() - now.getDay());
+      return date >= firstDay;
+    }
+
+    if(type === "month"){
+      return date.getMonth() === now.getMonth() &&
+             date.getFullYear() === now.getFullYear();
+    }
+
+    if(type === "year"){
+      return date.getFullYear() === now.getFullYear();
+    }
+
+    return true;
+  });
+
+  
+  filteredExportData = filtered;
+
+  filtered.forEach(row => {
+
+    const tr = document.createElement("tr");
+
+    tr.innerHTML = `
+      <td>${row.customer_id}</td>
+      <td>${row.booking_id}</td>
+      <td>${row.department}</td>
+      <td>${row.status}</td>
+      <td>${formatDate(row.start_time)}</td>
+      <td>${row.end_time ? formatDate(row.end_time) : "-"}</td>
+    `;
+
+    tbody.appendChild(tr);
+  });
+}
+
+function showTopRated(){
+  hideAllSections();  // 🔥 ADD THIS
+
+  document.getElementById("topRatedSection").style.display = "block";
+
+  document.getElementById("salesFilter").style.display = "none";
+  document.getElementById("topDescription").innerHTML = "";
+  document.getElementById("salesTable").innerHTML = "";
+}
+function loadTopRated(){
+
+  const filter = document.getElementById("salesFilterType").value;
+
+  fetch(`http://localhost:3001/api/top-sales?filter=${filter}`)
+  .then(res => res.json())
+  .then(data => {
+
+    const tbody = document.getElementById("salesTable"); 
+    const desc = document.getElementById("topDescription"); 
+
+    tbody.innerHTML = "";
+    desc.innerHTML = "";
+
+    if(!data.list || data.list.length === 0){
+      desc.innerText = "No sales found";
+      return;
+    }
+
+   
+    const top = data.top;
+    desc.innerText = `🔥 Top Model: ${top.vehicle_model} (${top.total} sales)`;
+
+    data.list.forEach(row => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${row.vehicle_model}</td>
+        <td>${row.total}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+  })
+  .catch(err => {
+    console.error("Top Rated Error:", err);
+  });
+}
+function showSalesFilter(){
+  document.getElementById("salesFilterBox").style.display = "block";
+}
+
+function applySalesFilter(){
+
+  const type = document.getElementById("salesFilterType").value;
+
+  fetch(`http://localhost:3001/api/top-sales?filter=${type}`)
+  .then(res => res.json())
+  .then(data => {
+
+    const tbody = document.getElementById("salesTable");
+    tbody.innerHTML = "";
+
+    data.list.forEach(row => {
+      const tr = document.createElement("tr");
+
+      tr.innerHTML = `
+        <td>${row.vehicle_model}</td>
+        <td>${row.total}</td>
+      `;
+
+      tbody.appendChild(tr);
+    });
+
+    
+    if(data.top){
+      document.getElementById("topDescription").innerText =
+        `🔥 Top Model (${type}): ${data.top.vehicle_model} with ${data.top.total} sales`;
+    } else {
+      document.getElementById("topDescription").innerText =
+        "No data available";
+    }
+
+  });
+}
+function hideAllSections(){
+  document.querySelector(".grid").style.display = "none";
+  document.getElementById("usersSection").style.display = "none";
+  document.getElementById("branchSection").style.display = "none";
+  document.getElementById("exportSection").style.display = "none";
+  document.getElementById("topRatedSection").style.display = "none";
+  document.getElementById("dataTable").style.display = "none";
+  document.getElementById("summary").style.display = "none";
+}
+function loadSales(){
+  document.getElementById("salesFilter").style.display = "block";
+
+  loadTopRated();   
+}
+</script>
+
+</body>
+</html>

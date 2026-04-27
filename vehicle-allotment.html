@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Vehicle Allotment</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#3a0ca3,#7209b7,#f72585);
+  color:white;
+}
+
+h1{
+  text-align:center;
+  padding:20px;
+}
+
+.logout-btn{
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:red;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+.container{
+  background:white;
+  color:black;
+  width:700px;
+  margin:40px auto;
+  padding:30px;
+  border-radius:10px;
+}
+
+label{
+  font-weight:bold;
+}
+
+input{
+  width:100%;
+  padding:10px;
+  margin-top:5px;
+  margin-bottom:20px;
+  border:1px solid #ccc;
+  border-radius:5px;
+}
+
+button{
+  background:#3a0ca3;
+  color:white;
+  border:none;
+  padding:10px 20px;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+button:hover{
+  background:#7209b7;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:20px;
+}
+
+th,td{
+  border:1px solid #ccc;
+  padding:10px;
+  text-align:center;
+}
+
+th{
+  background:#3a0ca3;
+  color:white;
+}
+
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<h1>Vehicle Allotment</h1>
+<a href="login.html" class="logout-btn">Logout</a>
+</div>
+
+<div class="container">
+
+<!-- TABLE FIRST -->
+<h3>Vehicle Allotment Dashboard</h3>
+<div id="table"></div>
+
+<!-- FORM (HIDDEN INITIALLY) -->
+<div id="formSection" style="display:none; margin-top:30px;">
+
+<h3>Allot Vehicle</h3>
+
+<form id="vehicleForm">
+
+<label>Customer ID</label>
+<input type="text" id="customer_id" readonly>
+
+<label>Booking ID</label>
+<input type="number" id="booking_id" readonly>
+
+<label>Allotement No</label>
+<input type="text" id="allotementno" required>
+
+<label>Chassis No</label>
+<input type="text" id="chassis_no" required>
+
+<label>Engine No</label>
+<input type="text" id="eng_no" required>
+
+<button type="submit">Submit</button>
+
+</form>
+</div>
+
+</div>
+
+<script>
+
+
+async function loadVehicleAllotments(){
+
+const r = await fetch("http://localhost:3001/api/vehicleallotment-refer");
+const data = await r.json();
+
+let html = `
+<table>
+<tr>
+<th>Customer ID</th>
+<th>Booking ID</th>
+<th>Status</th>
+<th>Action</th>
+</tr>
+`;
+
+data.forEach(d=>{
+html += `
+<tr>
+<td>${d.customer_id}</td>
+<td>${d.booking_id}</td>
+<td>${d.status}</td>
+<td>
+${
+  d.status === "Completed"
+  ? `<button disabled style="background:gray;cursor:not-allowed;">
+       Allotted
+     </button>`
+  : `<button onclick="openForm('${d.customer_id}','${d.booking_id}')">
+       Allot Vehicle
+     </button>`
+}
+</td>
+</tr>
+`;
+});
+
+html += "</table>";
+
+document.getElementById("table").innerHTML = html;
+
+}
+
+window.addEventListener("load", async () => {
+
+await fetch("http://localhost:3001/api/sync-vehicle-allotment");
+
+loadVehicleAllotments();
+
+});
+
+
+// OPEN FORM
+function openForm(customer_id, booking_id){
+
+document.getElementById("formSection").style.display="block";
+
+document.getElementById("customer_id").value = customer_id;
+document.getElementById("booking_id").value = booking_id;
+
+window.scrollTo(0,document.body.scrollHeight);
+
+}
+
+
+// SUBMIT FORM
+document.getElementById("vehicleForm").addEventListener("submit", async function(e){
+
+e.preventDefault();
+
+const data = {
+  allotementno: document.getElementById("allotementno").value,
+  chassis_no: document.getElementById("chassis_no").value,
+  eng_no: document.getElementById("eng_no").value,
+  customer_id: document.getElementById("customer_id").value,
+  booking_id: document.getElementById("booking_id").value
+};
+
+const res = await fetch("http://localhost:3001/add-vehicle-allotment",{
+  method:"POST",
+  headers:{
+    "Content-Type":"application/json"
+  },
+  body: JSON.stringify(data)
+});
+
+const result = await res.json();
+
+if(result.status === "success"){
+  alert("Vehicle Allotted Successfully");
+  location.reload();
+}else{
+  alert("Error saving vehicle allotment");
+}
+
+});
+
+</script>
+
+</body>
+</html>

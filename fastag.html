@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>FASTag Dashboard</title>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial;
+background:linear-gradient(135deg,#3a0ca3,#7209b7,#f72585);
+color:white;
+min-height:100vh;
+}
+
+h1{
+text-align:center;
+padding:15px;
+}
+
+.logout-btn {
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:red;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+}
+
+.container{
+width:90%;
+margin:auto;
+background:white;
+color:black;
+padding:20px;
+border-radius:10px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:20px;
+}
+
+input{
+width:100%;
+padding:10px;
+border:1px solid #ccc;
+border-radius:5px;
+}
+
+button{
+margin-top:15px;
+padding:12px;
+background:purple;
+color:white;
+border:none;
+border-radius:5px;
+font-size:16px;
+cursor:pointer;
+}
+
+table{
+width:100%;
+margin-top:20px;
+border-collapse:collapse;
+}
+
+th{
+background:purple;
+color:white;
+padding:10px;
+}
+
+td{
+text-align:center;
+padding:10px;
+border-bottom:1px solid #ddd;
+}
+
+.editBtn{
+background:purple;
+color:white;
+border:none;
+padding:6px 15px;
+border-radius:5px;
+cursor:pointer;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1>FASTag Dashboard</h1>
+
+<a href="#" class="logout-btn">Logout</a>
+
+<div class="container">
+
+<!-- ADD BUTTON -->
+<button onclick="showForm()" 
+style="padding:10px; font-size:20px; margin-bottom:20px; background:green; color:white; border:none; border-radius:10px;">
+Add FASTag
+</button>
+
+<!-- FORM -->
+<div id="formSection" style="display:none;">
+<div class="grid">
+
+<input id="customer_id" type="text" placeholder="Customer ID">
+<input id="booking_id" type="text" placeholder="Booking ID">
+
+<input id="fastag_number" type="text" placeholder="FASTag Number">
+<input id="amount" type="number" placeholder="Amount">
+
+</div>
+
+<button onclick="saveFastag()">Save FASTag</button>
+
+</div>
+
+<!-- STATUS TABLE -->
+<div id="statusTableSection" style="display:none;">
+
+<h2>Customers Ready For FASTag</h2>
+
+<table>
+
+<tr>
+<th>Customer ID</th>
+<th>Booking ID</th>
+<th>Status</th>
+</tr>
+
+<tbody id="statusTableBody"></tbody>
+
+</table>
+
+</div>
+
+</div>
+
+<script>
+
+function loadFastag(){
+
+fetch("http://localhost:3001/api/get-fastag")
+
+.then(res=>res.json())
+
+.then(data=>{
+
+if(data.length === 0){
+document.getElementById("statusTableSection").style.display="none";
+return;
+}
+
+document.getElementById("statusTableSection").style.display="block";
+
+let table=document.getElementById("statusTableBody");
+
+table.innerHTML="";
+
+data.forEach(row=>{
+
+let tr = `
+<tr>
+<td>${row.customer_id}</td>
+<td>${row.booking_id}</td>
+<td style="color:${row.status==='Completed'?'green':'orange'}">${row.status}</td>
+</tr>
+`;
+
+table.innerHTML += tr;
+
+});
+
+});
+
+}
+
+// SAVE
+function saveFastag(){
+
+let customer_id = document.getElementById("customer_id").value;
+let booking_id = document.getElementById("booking_id").value;
+let fastag_number = document.getElementById("fastag_number").value;
+let amount = document.getElementById("amount").value;
+
+if(!customer_id || !booking_id || !fastag_number || !amount){
+alert("Please fill all fields");
+return;
+}
+
+fetch("http://localhost:3001/api/add-fastag",{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify({
+customer_id,
+booking_id,
+fastag_number,
+amount
+})
+})
+
+.then(res=>res.json())
+
+.then(data=>{
+
+if(data.status === "success"){
+
+alert("FASTag Saved Successfully");
+
+clearForm();
+loadFastag();
+
+}else{
+alert("Error saving FASTag");
+}
+
+});
+
+}
+
+
+// EDIT (simple)
+function editFastag(customer,booking,fastag,amount){
+
+document.getElementById("formSection").style.display="block";
+
+document.getElementById("customer_id").value = customer;
+document.getElementById("booking_id").value = booking;
+document.getElementById("fastag_number").value = fastag;
+document.getElementById("amount").value = amount;
+
+}
+
+
+// CLEAR
+function clearForm(){
+document.getElementById("customer_id").value="";
+document.getElementById("booking_id").value="";
+document.getElementById("fastag_number").value="";
+document.getElementById("amount").value="";
+}
+
+
+// SHOW FORM
+function showForm(){
+
+document.getElementById("formSection").style.display="block";
+
+/* hide table when form opens */
+document.getElementById("fastagTableSection").style.display="none";
+
+}
+
+
+// LOAD ON START
+window.onload = function(){
+loadFastag();
+}
+
+</script>
+
+</body>
+</html>

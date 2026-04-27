@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Invoice Dashboard</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #3a0ca3, #7209b7, #f72585);
+  color: white;
+  position: relative;
+  min-height: 100vh;
+}
+h1 { text-align:center; padding:15px; }
+
+.container {
+  background: white;
+  color: black;
+  width: 90%;
+  margin: auto;
+  padding: 20px;
+  border-radius: 10px;
+  margin-top: 20px;
+}
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  margin-bottom:15px;
+  flex-wrap:wrap;
+}
+
+input, select {
+  width:48%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+button {
+  background: purple;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  width:100%;
+  cursor:pointer;
+}
+.action-buttons
+{
+  color: blue;
+
+}
+
+.logout-btn {
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:red;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-top:30px;
+}
+th{
+  background:#7209b7;
+  color:white;
+  padding:10px;
+}
+td{
+  padding:10px;
+  border:1px solid #ddd;
+  text-align:center;
+}
+.action-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  align-items: center;
+}
+
+.small-btn {
+  padding: 4px 8px;
+  font-size: 12px;
+  border-radius: 40px;
+  border: none;
+  cursor: pointer;
+  width: 79px;
+  height: 30px;
+}
+
+.upload-btn {
+  background-color: #4CAF50;
+  color: white;
+}
+
+.view-btn {
+  background-color: #2196F3;
+  color: white;
+}
+
+.small-btn:hover {
+  opacity: 0.85;
+}
+
+</style>
+</head>
+
+<body>
+
+<h1> Invoice Dashboard</h1>
+<a href="#" class="logout-btn" id="logoutBtn">Logout</a>
+
+<div class="container">
+
+  <div class="row">
+    <!-- <input type="text" id="invoice_id" placeholder="Invoice id"> -->
+    <input type="text" id="invoice_number" placeholder="Invoice Number">
+    <input type="text" id="customer_id" placeholder="Customer ID" onblur="checkCustomerExists()">
+  </div>
+
+  <div class="row">
+    <input type="number" id="booking_id" placeholder="Booking ID (Auto)" readonly>
+    <!-- Removed payment_id input here -->
+  </div>
+
+  <div class="row">
+    <input type="number" id="invoice_amount" placeholder="Invoice Amount">
+  </div>
+
+  <div class="row">
+    <select id="status">
+      <option value="">Select Status</option>
+      <option value="Pending">Pending</option>
+      <option value="Paid">Paid</option>
+      <option value="Cancelled">Cancelled</option>
+    </select>
+  </div>
+
+  <button onclick="validateAndSaveInvoice()">Save Invoice</button>
+
+  <h2>Customers Ready For Invoice (Payment Completed)</h2>
+  <table id="readyInvoiceTable">
+<tr>
+  <th>CUSTOMER ID</th>
+  <th>BOOKING ID</th>
+  <th>Status</th>
+  <th>Upload Receipt</th>
+  <th>All Receipts</th>     
+  <th>Download</th>   
+  <th>Action</th>
+</tr>
+</table>
+
+</div>
+
+<script>
+
+async function checkCustomerExists() {
+
+  const customerId = document.getElementById("customer_id").value.trim();
+  if(customerId === "") return false;
+
+  try {
+    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookings = await bookingRes.json();
+
+    const booking = bookings.find(b => Number(b.customer_id) === Number(customerId));
+
+    if(!booking){
+      alert("❌ Customer ID does not exist in Booking Dashboard");
+      customer_id.value = "";
+      booking_id.value = "";
+      // removed payment_id.value = "";
+      customer_id.focus();
+      return false;
+    }
+
+    booking_id.value = booking.booking_id;
+
+    // Removed payment check here
+
+    return true;   // ⭐ SUCCESS
+
+  } catch(err){
+    alert("Server not running!");
+    return false;
+  }
+}
+
+//////////////////////////////////////////////////
+// 🔴 VALIDATE BEFORE SAVE (UPDATED)
+//////////////////////////////////////////////////
+async function validateAndSaveInvoice() {
+
+  const invoiceNo  = document.getElementById("invoice_number").value.trim();
+  const customerId = document.getElementById("customer_id").value.trim();
+  const bookingId  = document.getElementById("booking_id").value.trim();
+  // Removed paymentId variable
+  const amount     = document.getElementById("invoice_amount").value.trim();
+  const statusVal  = document.getElementById("status").value.trim();
+
+  // Removed paymentId check here
+  if(!invoiceNo || !customerId || !bookingId || !amount || !statusVal){
+    alert("⚠️ Please fill all fields");
+    return;
+  }
+
+  try {
+    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookings = await bookingRes.json();
+
+    // Removed payment fetching and validation
+
+    const booking = bookings.find(b => b.booking_id == bookingId);
+
+    if(!booking){ alert("❌ Booking ID not found"); return; }
+    if(Number(booking.customer_id) !== Number(customerId)){ alert("❌ Customer mismatch Booking"); return; }
+
+    saveInvoice();
+
+  } catch(err){ 
+    alert("Server not running!"); 
+  }
+}
+//////////////////////////////////////////////////
+// 🟢 SAVE INVOICE (UNCHANGED EXCEPT REMOVAL OF payment_id)
+//////////////////////////////////////////////////
+ function saveInvoice() {
+  console.log("🔥 Save Invoice clicked");
+
+  const data = {
+  invoice_number: document.getElementById("invoice_number").value,
+  customer_id: document.getElementById("customer_id").value,
+  booking_id: document.getElementById("booking_id").value,
+  // Removed payment_id from data
+  invoice_amount: document.getElementById("invoice_amount").value,
+  status: document.getElementById("status").value
+};
+
+  fetch("http://localhost:3001/saveInvoice", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data)
+  })
+  .then(res => res.json())
+  .then(() => alert("✅ Invoice Saved Successfully"))
+  .catch(err => {
+    console.error(err);
+    alert("❌ Failed to save invoice");
+  });
+}
+
+
+
+//////////////////////////////////////////////////
+// ❌ YOUR OLD FUNCTION (KEPT EXACTLY AS IS)
+//////////////////////////////////////////////////
+async function loadCompletedPayments(){
+  const table = document.getElementById("readyInvoiceTable");
+  while(table.rows.length > 1){ table.deleteRow(1); }
+  try{
+    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookings = await bookingRes.json();
+    const paymentRes = await fetch("http://localhost:3001/api/payments");
+    const payments = await paymentRes.json();
+    payments.forEach(payment=>{
+      if(Number(payment.remaining_amount) === 0){
+        const booking = bookings.find(b => b.customer_id == payment.customer_id);
+        const row = table.insertRow();
+        row.insertCell(0).innerText = payment.customer_id;
+        row.insertCell(1).innerText = booking ? booking.customer_name : "N/A";
+        // Removed payment_id cell
+        row.insertCell(2).innerHTML = "<b style='color:orange'>Pending</b>";
+        row.insertCell(3).innerHTML =
+  `<button onclick="editInvoice('${payment.customer_id}')">Edit</button>`;
+      }
+    });
+  }catch(err){ console.error(err); }
+}
+
+//////////////////////////////////////////////////
+// ✅ NEW WORKING FUNCTION (ADDED ONLY)
+//////////////////////////////////////////////////
+async function loadCompletedPayments_FIXED(){
+
+  const table = document.getElementById("readyInvoiceTable");
+  while(table.rows.length > 1){ table.deleteRow(1); }
+
+  try {
+
+    const bookings = await fetch("http://localhost:3001/api/bookings").then(r=>r.json());
+    const payments = await fetch("http://localhost:3001/api/payments").then(r=>r.json());
+
+    console.log("Bookings:", bookings);
+    console.log("Payments:", payments);
+
+    // Loop through every payment
+    payments.forEach(payment => {
+
+      // ⭐ THIS IS THE REAL CONDITION FROM YOUR PAYMENT DASHBOARD
+      if(Number(payment.remaining_amount) === 0){
+
+        const booking = bookings.find(b => b.customer_id == payment.customer_id);
+
+        const row = table.insertRow();
+        row.insertCell(0).innerText = payment.customer_id;
+        row.insertCell(1).innerText = booking ? booking.customer_name : "N/A";
+        // Removed payment_id cell
+        row.insertCell(2).innerHTML = "<b style='color:orange'>Pending</b>";
+
+      }
+
+    });
+
+  } catch(err){
+    console.error("Error loading invoice customers:", err);
+  }
+}
+
+function viewTransaction(bookingId){
+  window.open(`http://localhost:3001/api/download-transaction-receipt/${bookingId}?mode=view`, "_blank");
+}
+async function loadInvoiceTable() {
+
+  const table = document.getElementById("readyInvoiceTable");
+
+  // Clear old rows
+  while (table.rows.length > 1) {
+    table.deleteRow(1);
+  }
+
+  try {
+
+    const invoiceRes = await fetch("http://localhost:3001/api/invoice-refer");
+    const invoiceData = await invoiceRes.json();
+    const receiptRes = await fetch("http://localhost:3001/api/invoice-receipts-all");
+      const receiptData = await receiptRes.json();
+
+    invoiceData.forEach(row => {
+      console.log("Row data:", row);
+
+      const tr = table.insertRow();
+
+      // 0 - Customer ID
+      tr.insertCell().innerText = row.customer_id;
+
+      // 1 - Booking ID
+      tr.insertCell().innerText = row.booking_id;
+
+      // 2 - Status
+     const statusCell = tr.insertCell();
+if (row.status === "Completed") {
+  statusCell.innerHTML = "<b style='color:green'>Completed</b>";
+} else {
+  statusCell.innerHTML = "<b style='color:orange'>Pending</b>";
+}
+const uploadCell = tr.insertCell();
+
+const bookingId = Number(row.booking_id);
+
+// Find matching receipt
+const receipt = receiptData.find(r =>
+  Number(r.booking_id) === bookingId
+);
+
+if (receipt) {
+  uploadCell.innerHTML = `
+    <button class="small-btn view-btn"
+      onclick="openReceipt('${receipt.receipt_file}')">
+      View
+    </button>
+  `;
+} else {
+  uploadCell.innerHTML = `
+    <button class="small-btn upload-btn"
+      onclick="handleUpload('${bookingId}')">
+      Upload
+    </button>
+  `;
+}
+function openReceipt(fileName) {
+  window.open(
+    `http://localhost:3001/uploads/${fileName}`,
+    "_blank"
+  );
+}
+// ===== ALL RECEIPTS COLUMN =====
+const allReceiptCell = tr.insertCell();
+
+allReceiptCell.innerHTML = `
+  <div style="display:flex;flex-direction:row;gap:8px;justify-content:center">
+    <button class="small-btn view-btn"
+      onclick="window.open('http://localhost:3001/api/download-booking-pdf/${row.customer_id}', '_blank')">
+      Booking
+    </button>
+
+    <button class="small-btn view-btn"
+      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${row.customer_id}?mode=view', '_blank')">
+      Payment
+    </button>
+  </div>
+`;
+
+
+// ===== INVOICE RECEIPT COLUMN =====
+const invoiceReceiptCell = tr.insertCell();
+
+if (row.status === "Completed") {
+
+  invoiceReceiptCell.innerHTML = `
+    <div style="display:flex;gap:8px;justify-content:center">
+      
+     
+
+      <button class="small-btn upload-btn"
+       onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${row.customer_id}?type=download', '_blank')">
+        Download
+      </button>
+
+    </div>
+  `;
+
+} else {
+
+  invoiceReceiptCell.innerHTML = `
+    <div style="display:flex;gap:8px;justify-content:center">
+    
+      <button class="small-btn upload-btn" disabled style="background:gray;cursor:not-allowed">
+        Download
+      </button>
+    </div>
+  `;
+}
+      // 5 - Action (Edit)
+      const actionCell = tr.insertCell();
+      actionCell.innerHTML = `
+        <button onclick="editInvoice(${row.customer_id})">
+          Edit
+        </button>
+      `;
+
+    });
+
+  } catch (err) {
+    console.error(err);
+    alert("❌ Failed loading invoice data!");
+  }
+}
+document.getElementById("logoutBtn").onclick = function(e){
+  e.preventDefault();
+  window.location.href="login.html";
+}
+
+async function editInvoice(customerId){
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+
+  try{
+
+   const res = await fetch(`http://localhost:3001/api/invoice-by-customer/${customerId}`);
+
+    // ⭐ THIS LINE FIXES EVERYTHING
+    if(res.status === 404){
+      document.getElementById("customer_id").value = customerId;
+      alert("No previous invoice found. Create new invoice.");
+      return;
+    }
+
+    if(res.status !== 200){
+      alert("Server error while fetching invoice");
+      return;
+    }
+
+    const invoice = await res.json();
+
+    console.log("Invoice received:", invoice); // 👀 check browser console
+
+    // ⭐ FILL ALL FIELDS NOW
+    document.getElementById("invoice_number").value = invoice.invoice_number;
+    document.getElementById("customer_id").value    = invoice.customer_id;
+    document.getElementById("booking_id").value     = invoice.booking_id;
+    document.getElementById("invoice_amount").value = invoice.invoice_amount;
+    document.getElementById("status").value         = invoice.status;
+
+    alert("Invoice loaded successfully ✏️");
+
+    setTimeout(()=>{
+      document.getElementById("invoice_number").focus();
+    },400);
+
+  }catch(err){
+    console.error(err);
+    alert("Cannot fetch invoice data. Is server running?");
+  }
+}
+async function viewInvoiceReceipts(bookingId){
+
+  const res = await fetch(`http://localhost:3001/api/invoice-receipts/${bookingId}`);
+  const receipts = await res.json();
+
+  let html = "<h2>📄 Invoice Receipts</h2>";
+
+  if(receipts.length === 0){
+    html += "<h3>No invoice receipts uploaded</h3>";
+  }
+
+  receipts.forEach((r,i)=>{
+    html += `
+      <div style="border:2px solid purple;margin:15px;padding:15px;border-radius:10px">
+        <h3>Invoice Receipt ${i+1}</h3>
+        <button onclick="openInvoicePDF('${r.receipt_file}')">
+          Open Receipt
+        </button>
+      </div>
+    `;
+  });
+
+  const win = window.open("", "_blank");
+  win.document.write(html);
+}
+
+window.addEventListener("load", async () => {
+
+  await fetch("http://localhost:3001/api/sync-invoice-refer");
+
+  loadInvoiceTable();
+
+});
+async function handleUpload(bookingId) {
+  console.log("Booking ID received:", bookingId);
+
+  const fileInput = document.getElementById("receiptFileInput");
+  fileInput.value = "";
+  fileInput.click();
+
+  fileInput.onchange = async function () {
+    const file = fileInput.files[0];
+    if (!file) return;
+
+    const formData = new FormData();
+    formData.append("receipt", file);
+    formData.append("booking_id", bookingId); // send booking_id to backend
+
+    try {
+      const res = await fetch(
+        "http://localhost:3001/api/upload-invoice-receipt",
+        {
+          method: "POST",
+          body: formData
+        }
+      );
+
+      if (res.ok) {
+        alert("✅ Receipt Uploaded Successfully");
+        loadInvoiceTable(); // reload table with all previous + new receipts
+      } else {
+        alert("❌ Upload failed");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("Server error");
+    }
+  };
+}
+function openReceipt(fileName) {
+  window.open(
+    `http://localhost:3001/uploads/${fileName}`,
+    "_blank"
+  );
+}
+async function viewInvoice(invoiceId){
+
+  try{
+
+    const res = await fetch(
+      `http://localhost:3001/api/invoice/${invoiceId}`
+    );
+
+    const data = await res.json();
+
+    const win = window.open("", "_blank", "width=500,height=450");
+
+    win.document.write(`
+      <html>
+      <head>
+        <title>Invoice Details</title>
+        <style>
+          body{
+            font-family: Arial;
+            padding:30px;
+            background:#f8f8f8;
+          }
+          h2{
+            color:#7209b7;
+          }
+          .box{
+            background:white;
+            padding:20px;
+            border-radius:10px;
+            box-shadow:0 5px 15px rgba(0,0,0,0.2);
+          }
+          .download-btn{
+            margin-top:20px;
+            padding:10px 20px;
+            background:#4CAF50;
+            color:white;
+            border:none;
+            border-radius:6px;
+            cursor:pointer;
+            font-size:14px;
+          }
+          .download-btn:hover{
+            opacity:0.85;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="box">
+          <h2>Invoice Details</h2>
+          <p><b>Invoice Number:</b> ${data.invoice_number}</p>
+          <p><b>Customer ID:</b> ${data.customer_id}</p>
+          <p><b>Booking ID:</b> ${data.booking_id}</p>
+          <p><b>Amount:</b> ₹${data.invoice_amount}</p>
+          <p><b>Status:</b> ${data.status}</p>
+<hr>
+
+<h3>📘 Booking Receipt</h3>
+<button class="download-btn"
+  onclick="window.open('http://localhost:3001/api/download-booking-pdf/${data.customer_id}', '_blank')">
+  Open Booking Receipt
+</button>
+
+<hr>
+
+<h3>💳 Payment Receipt</h3>
+<button class="download-btn"
+  onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${data.customer_id}?mode=view', '_blank')">
+  Open Payment Receipt
+</button>
+
+<hr>
+
+<h3>🧾 Invoice Receipt</h3>
+<button class="download-btn"
+  onclick="window.open(
+  'http://localhost:3001/api/download-invoice-pdf/${data.customer_id}?type=download',
+  '_blank'
+)"
+  Download Invoice Receipt
+ </button>
+        </div>
+      </body>
+      </html>
+    `);
+
+  } catch(err){
+    alert("Failed to load invoice");
+    console.error(err);
+  }
+}
+
+</script>
+<!-- ✅ ADD THIS LINE HERE -->
+<input type="file" id="receiptFileInput" style="display:none" />
+</body>
+</html>

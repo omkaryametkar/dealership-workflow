@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Login</title>
+
+  <style>
+    body{
+      margin:0;
+      font-family:Arial;
+      height:100vh;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      background:linear-gradient(120deg,#0f4c81,#6fb1d3);
+      color:white;
+    }
+
+    .quote{
+      margin-left:80px;
+      font-size:28px;
+      width:40%;
+    }
+
+    .login-box{
+      background:rgba(255,255,255,0.15);
+      padding:40px;
+      border-radius:15px;
+      width:320px;
+      margin-right:120px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    }
+
+    input, select{
+      width:100%;
+      padding:12px;
+      margin:10px 0;
+      border:none;
+      border-radius:6px;
+      font-size:14px;
+      background:white;
+      height:45px;
+      box-sizing: border-box;
+    }
+
+    button{
+      width:100%;
+      padding:12px;
+      background:#1e88e5;
+      color:white;
+      border:none;
+      border-radius:6px;
+      cursor:pointer;
+      font-size:16px;
+      transition: background 0.3s;
+    }
+
+    button:hover{
+      background:#1565c0;
+    }
+
+    #msg{
+      text-align:center;
+      margin-top:10px;
+      font-weight:bold;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="quote">
+  “I don't stop when I'm tired.<br>
+  I stop when I'm done.”
+</div>
+
+<div class="login-box">
+  <h2>Department Login</h2>
+
+  <input id="email" placeholder="Email">
+  <input id="password" type="password" placeholder="Password">
+
+  <select id="dept">
+  <option value="">-- Select Department --</option>
+</select>
+
+  <button id="loginBtn">Sign In</button>
+
+  <div id="msg"></div>
+</div>
+
+<script>
+document.getElementById("loginBtn").addEventListener("click", async () => {
+
+  const email = document.getElementById("email").value.trim();
+  const password = document.getElementById("password").value.trim();
+  const dept = document.getElementById("dept").value;
+  const msg = document.getElementById("msg");
+
+  if(!email || !password){
+    msg.style.color = "yellow";
+    msg.innerHTML = "⚠️ Please enter email and password";
+    return;
+  }
+
+  try{
+    const res = await fetch("http://localhost:3001/login", {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify({email, password, dept})
+    });
+
+    const data = await res.json();
+
+    if(data.success){
+
+      msg.style.color = "lightgreen";
+      msg.innerHTML = "✅ Login Success";
+
+      /*  
+      ===========================================
+        ONLY THIS PART IS UPDATED (SIMPLE FIX)
+      ===========================================
+      */
+
+      if (data.dept === "Sales") {
+        // ✔ Only redirect — DO NOT start TAT here
+        window.location = "booking.html";
+        return;
+      }
+
+      // Normal redirect for other departments
+      switch(data.dept){
+        case "Accounts": window.location="payment.html"; break;
+        case "Invoice": window.location="invoice.html"; break;
+        case "Insurance": window.location="insurance.html"; break;
+        case "RTO": window.location="rto.html"; break;
+        case "Delivery": window.location="delivery.html"; break;
+        case "Admin": window.location="admin.html"; break;
+        case "Accessories": window.location="accessories.html"; break;
+        case "Vehicle Allotment": window.location="vehicle-allotment.html"; break;
+        case "Fastag": window.location="fastag.html"; break;
+      }
+
+    } else {
+      msg.style.color = "yellow";
+      msg.innerHTML = "❌ Invalid Login";
+    }
+
+  } catch(err){
+    console.error(err);
+    msg.style.color = "red";
+    msg.innerHTML = "❌ Server not reachable";
+  }
+});
+async function loadDepartments(){
+  try{
+    const res = await fetch("http://localhost:3001/api/departments");
+    const data = await res.json();
+
+    const deptSelect = document.getElementById("dept");
+    deptSelect.innerHTML = `<option value="">-- Select Department --</option>`;
+
+    data.forEach(d => {
+      const option = document.createElement("option");
+      option.value = d;
+      option.textContent = d;
+      deptSelect.appendChild(option);
+    });
+
+  }catch(err){
+    console.error("Dept load error", err);
+  }
+}
+
+/* CALL THIS WHEN PAGE LOADS */
+loadDepartments();
+</script>
+
+</body>
+</html>

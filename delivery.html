@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Delivery Dashboard</title>
+
+<style>
+body{
+  margin:0;
+  font-family:Arial;
+  background:linear-gradient(135deg,#3a0ca3,#7209b7,#f72585);
+  color:white;
+}
+
+h1{
+  text-align:center;
+  padding:15px;
+  position:relative;
+}
+
+.logout-btn{
+  position:absolute;
+  top:20px;
+  right:30px;
+  background:red;
+  color:white;
+  padding:8px 12px;
+  border:none;
+  border-radius:5px;
+  cursor:pointer;
+}
+
+.container{
+  background:white;
+  color:black;
+  width:90%;
+  margin:auto;
+  padding:20px;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+
+th,td{
+  padding:10px;
+  border:1px solid #ccc;
+  text-align:center;
+}
+
+button{
+  padding:6px 12px;
+  border:none;
+  cursor:pointer;
+  margin:2px;
+}
+
+.deliver-btn{ background:#28a745; color:white; }
+.view-btn{ background:#007bff; color:white; }
+
+.modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+}
+
+.modal-content{
+  background:white;
+  color:black;
+  width:60%;
+  margin:80px auto;
+  padding:20px;
+  border-radius:10px;
+}
+
+.verify{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:5px;
+  font-weight:bold;
+}
+
+.verify input{
+  width:18px;
+  height:18px;
+  accent-color:gray;
+}
+
+.detail-text{
+  margin-left:25px;
+  margin-bottom:10px;
+}
+.receipt-btn{
+  background: linear-gradient(135deg,#007bff,#00c6ff);
+  color:white;
+  font-size:16px;
+  font-weight:bold;
+  padding:10px 18px;
+  border-radius:8px;
+  border:none;
+  cursor:pointer;
+  transition:0.3s;
+  min-width:120px;
+}
+
+.receipt-btn:hover{
+  transform:scale(1.05);
+  box-shadow:0 5px 15px rgba(0,0,0,0.3);
+}
+</style>
+</head>
+
+<body>
+
+<h1> Delivery Department</h1>
+<button class="logout-btn" onclick="logout()">Logout</button>
+
+<div class="container">
+  <h2>Vehicle Delivery</h2>
+
+  <table id="deliveryTable">
+    <thead>
+      <tr>
+        <th>Customer ID</th>
+        <th>Booking ID</th>
+        <th>Status</th>
+        <th>Action</th>
+        <th>All Receipt</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+</div>
+
+<div id="modal" class="modal">
+  <div class="modal-content">
+    <h2>Customer Full Details</h2>
+    <div id="details"></div>
+    <br>
+    <button onclick="closeModal()">Close</button>
+  </div>
+</div>
+
+<script>
+let selectedCustomerId=null;
+
+function logout(){
+  window.location.href="login.html";
+}
+
+function syncDelivery(){
+  return fetch("http://localhost:3001/api/sync-delivery",{method:"POST"});
+}
+
+function loadDelivery(){
+  fetch("http://localhost:3001/api/delivery")
+  .then(res=>res.json())
+  .then(data=>{
+    const tbody=document.querySelector("#deliveryTable tbody");
+    tbody.innerHTML="";
+    data.forEach(c=>{
+      tbody.innerHTML+=`
+      <tr>
+        <td>${c.customer_id}</td>
+        <td>${c.booking_id}</td>
+        <td>${c.status}</td>
+        <td><button class="view-btn" onclick="viewDetails('${c.customer_id}')">View</button></td>
+        <td><button class="view-btn" onclick="allReceipt('${c.customer_id}')">View</button></td>
+      </tr>`;
+    });
+  });
+}
+
+/* 🔍 VIEW DETAILS */
+function viewDetails(id){
+  selectedCustomerId=id;
+
+  fetch("http://localhost:3001/api/customer-full-details/"+id)
+  .then(res=>res.json())
+  .then(d=>{
+    document.getElementById("modal").style.display="block";
+
+    document.getElementById("details").innerHTML=`
+<h2>👤 CUSTOMER VERIFICATION</h2>
+<hr>
+
+<div class="verify">
+  <input type="checkbox" id="invCheck" onchange="updateCheckboxes()">
+  <label>📄 INVOICE DETAILS</label>
+</div>
+<div class="detail-text">
+  Customer ID : ${d.customer_id}<br>
+  Booking ID : ${d.booking_id}<br>
+  Invoice Status : ${d.invoice_status}
+</div>
+
+<hr>
+
+<div class="verify">
+  <input type="checkbox" id="insCheck" onchange="updateCheckboxes()">
+  <label>🛡 INSURANCE DETAILS</label>
+</div>
+<div class="detail-text">
+  Insurance Company : ${d.insurance_company}<br>
+  Policy Number : ${d.policy_number}<br>
+  Policy Type : ${d.policy_type}
+</div>
+
+<hr>
+
+<div class="verify">
+  <input type="checkbox" id="rtoCheck" onchange="updateCheckboxes()">
+  <label>🚗 RTO DETAILS</label>
+</div>
+<div class="detail-text">
+  Receipt No : ${d.receipt_no}<br>
+  Registration No : ${d.registration_no}
+</div>
+
+<hr>
+<div id="deliverBtnContainer"></div>
+`;
+
+    /* ✅ ADDITION: completed status handling */
+    if(d.status==="Completed"){
+      ["invCheck","insCheck","rtoCheck"].forEach(id=>{
+        const cb=document.getElementById(id);
+        cb.checked=true;
+        cb.disabled=true;
+        cb.style.accentColor="green";
+      });
+
+      document.getElementById("deliverBtnContainer").innerHTML="";
+      alert("✅ Customer has completed all verifications.");
+    }
+  });
+}
+function allReceipt(customer_id){
+
+  document.getElementById("modal").style.display="block";
+
+  document.getElementById("details").innerHTML = `
+    <h2 style="text-align:center; font-size:24px;">📑 ALL RECEIPTS</h2>
+    <hr>
+
+    <div style="
+        display:flex;
+        justify-content:center;
+        flex-wrap:wrap;
+        gap:15px;
+        margin-top:20px;
+    ">
+
+      <button class="receipt-btn"
+        onclick="window.open('http://localhost:3001/api/download-booking-pdf/${customer_id}', '_blank')">
+        Booking
+      </button>
+
+      <button class="receipt-btn"
+       onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${customer_id}?mode=view', '_blank')">
+        Payment
+      </button>
+
+      <button class="receipt-btn"
+        onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${customer_id}', '_blank')">
+        Invoice
+      </button>
+
+      <button class="receipt-btn"
+        onclick="window.open('http://localhost:3001/api/download-insurance-pdf/${customer_id}', '_blank')">
+        Insurance
+      </button>
+
+      <button class="receipt-btn"
+        onclick="window.open('http://localhost:3001/api/download-rto-pdf/${customer_id}', '_blank')">
+        RTO
+      </button>
+
+    </div>
+  `;
+}
+
+function closeModal(){
+  document.getElementById("modal").style.display="none";
+}
+
+function updateCheckboxes(){
+  const inv=document.getElementById("invCheck");
+  const ins=document.getElementById("insCheck");
+  const rto=document.getElementById("rtoCheck");
+
+  [inv,ins,rto].forEach(cb=>{
+    cb.style.accentColor=cb.checked?"green":"gray";
+  });
+
+  const container=document.getElementById("deliverBtnContainer");
+  if(inv.checked && ins.checked && rto.checked){
+    container.innerHTML=`<button class="deliver-btn" onclick="markDelivered()">Mark Delivered</button>`;
+  }else{
+    container.innerHTML="";
+  }
+}
+
+function markDelivered(){
+  fetch("http://localhost:3001/api/delivery-complete/"+selectedCustomerId,{method:"PUT"})
+  .then(()=>{
+    loadDelivery();
+    closeModal();
+  });
+}
+
+syncDelivery().then(()=>loadDelivery());
+</script>
+
+</body>
+</html>

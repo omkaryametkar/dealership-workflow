@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Insurance Dashboard</title>
+
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #3a0ca3, #7209b7, #f72585);
+  color: white;
+  min-height: 100vh;
+}
+h1 { text-align:center; padding:15px; }
+
+.container {
+  background:white;
+  color:black;
+  width:90%;
+  margin:20px auto;
+  padding:20px;
+  border-radius:10px;
+}
+.row input:only-child{
+  width:100%;
+}
+#receiptPopup {
+  position: fixed;
+  right: 20px;      
+  top: 100px;       
+  width: 350px;
+  background: white;
+  color: black;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 20px rgba(0,0,0,0.2);
+  display: none;
+  z-index: 9999;
+}
+
+
+.row {
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+
+input {
+  width:48%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  margin-bottom:10px;
+}
+.logout-btn {
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:red;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+}
+
+button {
+  width:100%;
+  background:purple;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  cursor:pointer;
+}
+.view-btn {
+  width:auto;              
+  background:#0d6efd;     
+  padding:8px 20px;
+  font-size:14px;
+  border-radius:6px;
+}
+
+.view-btn:hover {
+  background:#084298;
+}
+
+table {
+  width:100%;
+  border-collapse:collapse;
+  margin-top:25px;
+}
+th {
+  background:#7209b7;
+  color:white;
+  padding:10px;
+}
+td {
+  padding:10px;
+  border:1px solid #ddd;
+  text-align:center;
+}
+</style>
+</head>
+
+<body>
+
+<h1>🛡️ Insurance Dashboard</h1>
+<a href="#" class="logout-btn" id="logoutBtn">Logout</a>
+
+<div class="container">
+
+  <div class="row">
+    <input type="text" id="customer_id" placeholder="Customer ID" onblur="validateCustomer()">
+    <input type="text" id="booking_id" placeholder="Booking ID" readonly>
+  </div>
+
+  <div class="row">
+    <input type="text" id="insurance_company" placeholder="Insurance Company">
+    <input type="text" id="policy_number" placeholder="Policy Number">
+  </div>
+
+  <div class="row">
+    <input type="text" id="policy_type" placeholder="Policy Type">
+    <input type="number" id="policy_amount" placeholder="Policy Amount">
+  </div>
+
+  <button onclick="saveInsurance()">Save Insurance</button>
+
+  <h2>Insurance Records</h2>
+ <table id="insuranceTable">
+<tr>
+  <th>Customer ID</th>
+  <th>Booking ID</th>
+  <th>Status</th>
+  <th>Insurance Receipt</th>
+  <th>All Receipts</th> 
+  <th>Action</th>
+</tr>
+</table>
+
+
+
+</div>
+<div id="receiptPopup">
+  <h3>Insurance Details</h3>
+  <p><b>Customer ID:</b> <span id="rc_id"></span></p>
+  <p><b>Company:</b> <span id="rc_company"></span></p>
+  <p><b>Policy Number:</b> <span id="rc_policy"></span></p>
+  <p><b>Policy Type:</b> <span id="rc_type"></span></p>
+  <p><b>Amount:</b> ₹<span id="rc_amount"></span></p>
+
+  <button onclick="downloadReceipt()" style="background:green;color:white;width:100%;padding:10px;border-radius:5px;margin-top:10px;">
+    Download
+  </button>
+
+  <div id="allReceipts"></div>
+
+  <button onclick="closePopup()" style="background:red;color:white;width:100%;padding:10px;border-radius:5px;margin-top:10px;">
+    Close
+  </button>
+</div>
+<script>
+  
+
+let selectedCustomer = null; // store validated customer
+
+async function loadInsurance() {
+  const table = document.getElementById("insuranceTable");
+  while (table.rows.length > 1) table.deleteRow(1);
+
+  const res = await fetch("http://localhost:3001/api/insurance");
+  const data = await res.json();
+
+  window.allCustomers = data; // store globally
+
+ data.forEach(row => {
+  const tr = table.insertRow();
+
+ tr.insertCell(0).innerText = row.customer_id;
+tr.insertCell(1).innerText = row.booking_id;
+
+const color = row.status === "Completed" ? "green" : "orange";
+tr.insertCell(2).innerHTML =
+  `<b style="color:${color}">${row.status}</b>`;
+
+// ✅ NEW RECEIPT COLUMN
+const receiptCell = tr.insertCell(3);
+
+if (row.status === "Completed") {
+  receiptCell.innerHTML = `
+    <button class="view-btn" onclick="viewInsurancePDF(${row.customer_id})">
+      View
+    </button>
+
+    <button class="view-btn" style="background:green;" onclick="downloadInsurancePDF(${row.customer_id})">
+      Download
+    </button>
+  `;
+} else {
+  receiptCell.innerHTML = "-";
+}
+
+/* ⭐ ADD THIS PART ONLY — NEW ALL RECEIPTS COLUMN */
+const receiptsCell = tr.insertCell(4);
+
+receiptsCell.innerHTML = `
+  <button class="view-btn" onclick="openBookingPDF(${row.customer_id})">
+    Booking
+  </button>
+
+  <button class="view-btn" style="background:#198754;" onclick="openPaymentPDF(${row.customer_id})">
+    Payment
+  </button>
+
+  <button class="view-btn" style="background:#6f42c1;" onclick="openInvoicePDF(${row.customer_id})">
+    Invoice
+  </button>
+`;
+
+// ✅ ACTION COLUMN (SHIFTED TO INDEX 4)
+const actionCell = tr.insertCell(5);
+
+if (row.status === "Completed") {
+  actionCell.innerHTML = `
+    <button onclick="editInsurance(${row.customer_id})">
+      Edit
+    </button>`;
+} else {
+  actionCell.innerHTML = "-";
+}
+});
+
+}
+async function editInsurance(customer_id) {
+
+  const res = await fetch(
+    `http://localhost:3001/api/insurance-details/${customer_id}`
+  );
+  const data = await res.json();
+
+if (!data || data.length === 0) {
+  alert("Insurance details not found");
+  return;
+}
+
+const row = data[0];   // ✅ ADD THIS LINE
+
+document.getElementById("customer_id").value = row.customer_id;
+// document.getElementById("customer_name").value = row.booking_id;
+document.getElementById("insurance_company").value = row.insurance_company;
+document.getElementById("policy_number").value = row.policy_number;
+document.getElementById("policy_type").value = row.policy_type;
+document.getElementById("policy_amount").value = row.policy_amount;
+
+selectedCustomer = { 
+  customer_id: row.customer_id,
+  // booking_id: row.booking_id
+};
+
+  window.isEditMode = true;
+}
+
+
+/* ⭐ LIVE VALIDATION WHEN ENTERING CUSTOMER ID */
+function validateCustomer(){
+
+  const id = document.getElementById("customer_id").value.trim();
+  const bookingField = document.getElementById("booking_id");
+
+  if(!id){
+    bookingField.value = "";
+    return;
+  }
+
+  // 🔹 Ensure data is loaded
+  if(!window.allCustomers || window.allCustomers.length === 0){
+    alert("Customer data not loaded yet. Please wait.");
+    return;
+  }
+
+  // 🔹 Find customer safely
+const customer = window.allCustomers.find(
+  c => String(c.customer_id).trim() === id
+);
+
+  if(!customer){
+    alert("Customer ID not found");
+    bookingField.value = "";
+    selectedCustomer = null;
+    return;
+  }
+
+  // 🔹 If already completed
+  if(customer.status === "Completed"){
+    alert("Insurance already completed for this customer");
+    bookingField.value = customer.booking_id;
+    selectedCustomer = null;
+    return;
+  }
+
+  // 🔹 Valid pending customer
+  bookingField.value = customer.booking_id;
+
+  selectedCustomer = {
+    customer_id: customer.customer_id,
+    booking_id: customer.booking_id
+  };
+
+}
+async function viewReceipt(customer_id) {
+  const res = await fetch("http://localhost:3001/api/insurance-details/" + customer_id);
+  const data = await res.json();
+
+  if (data.length === 0) {
+    alert("No details found");
+    return;
+  }
+
+  const d = data[0];
+
+  document.getElementById("rc_id").innerText = d.customer_id || d.customerid || d.cust_id;
+  document.getElementById("rc_company").innerText = d.insurance_company;
+  document.getElementById("rc_policy").innerText = d.policy_number;
+  document.getElementById("rc_type").innerText = d.policy_type;
+  document.getElementById("rc_amount").innerText = d.policy_amount;
+
+  
+  document.getElementById("allReceipts").innerHTML = `
+    <hr>
+    <h4>All Previous Receipts</h4>
+
+    <button onclick="window.open('http://localhost:3001/api/download-booking-pdf/${d.customer_id}?type=view', '_blank')">
+      Open Booking Receipt
+    </button>
+
+    <button style="margin-top:8px;"
+      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${d.customer_id}?mode=view', '_blank')">
+      Open Payment Receipt
+    </button>
+
+    <button style="margin-top:8px;"
+      onclick="openInvoice(${d.customer_id})">
+      Invoice Receipt
+    </button>
+  `;
+  
+
+  // ✅ New clean receipt output (Only Insurance, no extra receipts)
+  document.getElementById("allReceipts").innerHTML = "";
+
+  document.getElementById("receiptPopup").style.display = "block";
+}
+
+/* SAVE INSURANCE */
+async function saveInsurance(){
+
+  if(!selectedCustomer){
+    alert("Please enter valid pending customer");
+    return;
+  }
+
+  const res = await fetch("http://localhost:3001/api/save-insurance", {
+  method: "POST",
+  headers:{
+    "Content-Type":"application/json"
+  },
+  body: JSON.stringify({
+  customer_id: selectedCustomer.customer_id,
+  booking_id: selectedCustomer.booking_id,
+      insurance_company: document.getElementById("insurance_company").value,
+      policy_number: document.getElementById("policy_number").value,
+      policy_type: document.getElementById("policy_type").value,
+      policy_amount: document.getElementById("policy_amount").value
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert("Insurance Successfully Completed");
+    location.reload();
+  }else{
+    alert("Error saving insurance");
+  }
+}
+
+window.onload = async () => {
+  await fetch("http://localhost:3001/api/sync-insurance",{method:"POST"});
+  loadInsurance();
+};
+document.getElementById("logoutBtn").onclick = function(e){
+  e.preventDefault();
+  window.location.href="login.html";
+}
+
+
+function closePopup() {
+  document.getElementById("receiptPopup").style.display = "none";
+}
+
+
+function viewInsurancePDF(customer_id) {
+  window.open(
+    "http://localhost:3001/api/download-insurance-pdf/" + customer_id + "?type=view",
+    "_blank"
+  );
+}
+
+
+function downloadInsurancePDF(customer_id) {
+  window.open(
+    "http://localhost:3001/api/download-insurance-pdf/" + customer_id + "?type=download",
+    "_blank"
+  );
+}
+function openBookingPDF(customer_id) {
+  window.open(
+    "http://localhost:3001/api/download-booking-pdf/" + customer_id + "?type=view",
+    "_blank"
+  );
+}
+
+
+function openPaymentPDF(customer_id) {
+  window.open(
+    "http://localhost:3001/api/download-transaction-receipt/" + customer_id + "?mode=view",
+    "_blank"
+  );
+}
+
+
+function openInvoicePDF(customer_id) {
+  window.open(
+    "http://localhost:3001/api/download-invoice-pdf/" + customer_id + "?type=view",
+    "_blank"
+  );
+}
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</body>
+</html>

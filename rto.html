@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>RTO Dashboard</title>
+
+<style>
+body {
+  margin:0;
+  font-family:Arial;
+  background: linear-gradient(135deg,#3a0ca3,#7209b7,#f72585);
+  color:white;
+  min-height:100vh;
+}
+
+.header{
+  background: linear-gradient(90deg,#6a11cb,#8e2de2);
+  padding:15px;
+  display:flex;
+  justify-content:center;
+  align-items:center;
+  position:relative;
+}
+.header h1{margin:0;}
+
+.logout-btn {
+  position:absolute;
+  right:20px;
+  top:20px;
+  background:red;
+  padding:10px 20px;
+  border-radius:8px;
+  color:white;
+  font-weight:bold;
+  text-decoration:none;
+}
+
+.container{
+  background:white;
+  color:black;
+  width:90%;
+  margin:20px auto;
+  padding:20px;
+  border-radius:10px;
+}
+
+table{
+  width:100%;
+  border-collapse:collapse;
+  margin-bottom:25px;
+}
+
+th,td{
+  padding:12px;
+  border:1px solid #ccc;
+  text-align:center;
+}
+
+th{
+  background:#7209b7;
+  color:white;
+}
+
+.row{
+  display:flex;
+  justify-content:space-between;
+  flex-wrap:wrap;
+  margin-bottom:15px;
+}
+.view-btn {
+  width:auto;              
+  background:#0d6efd;     
+  padding:8px 20px;
+  font-size:14px;
+  border-radius:6px;
+}
+
+.view-btn:hover {
+  background:#084298;
+}
+
+input{
+  width:48%;
+  padding:12px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  font-size:16px;
+  margin-bottom:10px;
+}
+
+button{
+  width:100%;
+  background:purple;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:8px;
+  font-size:18px;
+  cursor:pointer;
+}
+
+.status-pending { color: orange; font-weight: bold; }
+.status-completed { color: green; font-weight: bold; }
+/* MODAL */
+.modal{
+  display:none;
+  position:fixed;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  background:rgba(0,0,0,0.6);
+  z-index:999;
+}
+
+.modal-box{
+  background:white;
+  width:420px;
+  margin:8% auto;
+  padding:25px;
+  border-radius:12px;
+  box-shadow:0 0 25px rgba(0,0,0,0.3);
+  color:black;
+}
+
+.modal-box h2{
+  text-align:center;
+  color:#7209b7;
+}
+
+.download-btn{
+  margin-top:15px;
+  background:#0d6efd;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:6px;
+  width:100%;
+  font-size:16px;
+}
+
+.close-btn{
+  margin-top:10px;
+  background:#7209b7;
+  color:white;
+  padding:12px;
+  border:none;
+  border-radius:6px;
+  width:100%;
+  font-size:16px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+  <h1>🚗 RTO Dashboard</h1>
+  <a href="login.html" class="logout-btn">Logout</a>
+</div>
+
+
+<div class="container">
+
+<h2>Add RTO Details</h2>
+
+<div class="row">
+  <input type="text" id="customer_id" placeholder="Customer ID" onblur="checkCustomer()">
+  <input type="text" id="receipt_no" placeholder="RTO Receipt No" disabled>
+</div>
+
+<div class="row">
+  <input type="text" id="reg_no" placeholder="Registration No" disabled>
+  <input type="date" id="reg_date" disabled>
+</div>
+
+<div class="row">
+  <input type="number" id="reg_amount" placeholder="Registration Amount" disabled>
+</div>
+
+<button onclick="saveRTO()" disabled id="saveBtn">Save RTO Details</button>
+
+<hr>
+
+<h2>Customers Ready For RTO</h2>
+
+<table id="rtoTable">
+<thead>
+<tr>
+  <th>Customer ID</th>
+  <th>Booking ID</th>
+  <th>Status</th>
+  <th>RTO Receipt</th>   
+  <th>All Receipts</th>
+  <th>Action</th>
+</tr>
+</thead>
+<tbody></tbody>
+</table>
+
+</div>
+
+<script>
+
+window.onload = async function(){
+
+  await fetch("http://localhost:3001/api/sync-rto", { method: "POST" });
+
+  const res = await fetch("http://localhost:3001/api/get-rto-customers");
+  const data = await res.json();
+
+  const tbody = document.querySelector("#rtoTable tbody");
+  tbody.innerHTML = "";
+
+  data.forEach(row => {
+let actionBtn = "";
+let receiptBtn = "-";   // default for Pending
+
+if (row.status === "Completed") {
+  receiptBtn = `
+    <button class="view-btn" onclick="openRtoPDF(${row.customer_id})">View</button>
+
+    <button class="view-btn" style="background:green;"
+      onclick="downloadRtoPDF(${row.customer_id})">
+      Download
+    </button>
+  `;
+}
+
+// show EDIT when completed
+if(row.status === "Completed"){
+  actionBtn = `<button onclick="editRTO(${row.customer_id})">Edit</button>`;
+}
+
+  tbody.innerHTML += `
+    <tr>
+      <td>${row.customer_id}</td>
+      <td>${row.booking_id}</td>
+      <td class="${row.status === 'Completed' ? 'status-completed' : 'status-pending'}">
+        ${row.status}
+      </td>
+      <td>${receiptBtn}</td>
+
+<td>
+  <button class="view-btn" onclick="viewAllReceipts(${row.customer_id})">
+    All Receipts
+  </button>
+</td>
+
+<td>${actionBtn}</td>
+    </tr>
+  `;
+});
+};
+
+//////////////////////////////////////////////////////
+// CHECK CUSTOMER IMMEDIATELY AFTER ID ENTRY
+//////////////////////////////////////////////////////
+async function checkCustomer(){
+
+  const customer_id = document.getElementById("customer_id").value.trim();
+  if(!customer_id) return;
+
+  const res = await fetch(`http://localhost:3001/api/check-rto/${customer_id}`);
+  const data = await res.json();
+
+  // RESET
+  disableFields(true);
+
+  if(!data.exists){
+    alert("Invalid Customer ID");
+    return;
+  }
+
+  if(data.status === "Completed"){
+    alert("RTO already completed successfully");
+    return;
+  }
+
+  // ✅ STATUS = PENDING → ENABLE FORM
+  disableFields(false);
+}
+
+function disableFields(disabled){
+  document.getElementById("receipt_no").disabled = disabled;
+  document.getElementById("reg_no").disabled = disabled;
+  document.getElementById("reg_date").disabled = disabled;
+  document.getElementById("reg_amount").disabled = disabled;
+  document.getElementById("saveBtn").disabled = disabled;
+}
+
+//////////////////////////////////////////////////////
+// SAVE RTO
+//////////////////////////////////////////////////////
+async function saveRTO(){
+
+  const customer_id = document.getElementById("customer_id").value.trim();
+  const receipt_no = document.getElementById("receipt_no").value;
+  const reg_no = document.getElementById("reg_no").value;
+  const reg_date = document.getElementById("reg_date").value;
+  const reg_amount = document.getElementById("reg_amount").value;
+
+  if(!receipt_no || !reg_no || !reg_date || !reg_amount){
+    alert("Fill all fields");
+    return;
+  }
+
+  const res = await fetch("http://localhost:3001/api/save-rto",{
+    method:"POST",
+    headers:{ "Content-Type":"application/json" },
+    body:JSON.stringify({
+      customer_id,
+      receipt_no,
+      registration_no: reg_no,
+      registration_date: reg_date,
+      registration_amount: reg_amount
+    })
+  });
+
+  const data = await res.json();
+
+  if(data.success){
+    alert("RTO Details Saved Successfully");
+    location.reload();
+  }else{
+    alert("Error saving RTO");
+  }
+}
+
+function viewAllReceipts(customerId) {
+
+  document.getElementById("allReceipts").innerHTML = `
+    <hr><h3>All Receipts</h3><br>
+
+    <button class="view-btn"
+      onclick="window.open('http://localhost:3001/api/download-booking-pdf/${customerId}', '_blank')">
+      Booking Receipt (PDF)
+    </button><br><br>
+
+    <button class="view-btn"
+      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${customerId}?mode=view', '_blank')">
+      Payment Receipt (PDF)
+    </button><br><br>
+
+    <button class="view-btn"
+      onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${customerId}', '_blank')">
+      Invoice Receipt (PDF)
+    </button><br><br>
+
+    <button class="view-btn"
+      onclick="window.open('http://localhost:3001/api/download-insurance-pdf/${customerId}', '_blank')">
+      Insurance Receipt (PDF)
+    </button><br><br>
+  `;
+
+  document.getElementById("rtoModal").style.display = "block";
+}
+async function editRTO(customer_id){
+
+  const res = await fetch(`http://localhost:3001/api/rto-details/${customer_id}`);
+  const data = await res.json();
+
+  if(!data){
+    alert("No previous RTO details found");
+    return;
+  }
+
+  // Fill form
+  document.getElementById("customer_id").value = data.customer_id;
+  document.getElementById("receipt_no").value = data.receipt_no;
+  document.getElementById("reg_no").value = data.registration_no;
+  document.getElementById("reg_date").value = data.registration_date.split("T")[0];
+  document.getElementById("reg_amount").value = data.registration_amount;
+
+  // Enable fields
+  disableFields(false);
+}
+
+//////////////////////////////////////////////////////
+// VIEW RTO RECEIPT PDF
+//////////////////////////////////////////////////////
+function viewRTOReceipt(file){
+  window.open(`http://localhost:3001/uploads/${file}`, "_blank");
+}
+async function viewRTO(customer_id){
+
+  currentCustomerId = customer_id;
+
+  const res = await fetch(`http://localhost:3001/api/view-rto-details/${customer_id}`);
+  const data = await res.json();
+
+  if(!data){
+    alert("No RTO details found");
+    return;
+  }
+
+  document.getElementById("v_customer").innerText = data.customer_id;
+  document.getElementById("v_receipt").innerText = data.receipt_no;
+  document.getElementById("v_regno").innerText = data.registration_no;
+  document.getElementById("v_regdate").innerText = data.registration_date.split("T")[0];
+  document.getElementById("v_amount").innerText = data.registration_amount;
+
+  document.getElementById("rtoModal").style.display = "block";
+}
+function closeModal(){
+  document.getElementById("rtoModal").style.display = "none";
+}
+function downloadRTO(){
+
+  if(!currentCustomerId){
+    alert("Please open RTO details first");
+    return;
+  }
+
+  // ⭐ This triggers real browser download
+  window.location.href = `http://localhost:3001/api/download-rto/${currentCustomerId}`;
+}
+function openRtoPDF(customer_id) {
+  window.open(`http://localhost:3001/api/download-rto-pdf/${customer_id}`, "_blank");
+}
+
+function downloadRtoPDF(customer_id) {
+  window.location.href = `http://localhost:3001/api/download-rto/${customer_id}`;
+}
+</script>
+<div id="rtoModal" class="modal">
+  <div class="modal-box">
+
+    <h2>All Receipts</h2>
+    <hr>
+
+    <div id="allReceipts"></div>
+
+    <button class="close-btn" onclick="closeModal()">Close</button>
+
+  </div>
+</div>
+</body>
+</html>
