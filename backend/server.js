@@ -12,7 +12,7 @@ app.use(express.static(__dirname));
 
 // ✅ Root route (ONLY ONE)
 app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "admin.html")); // or login.html
+  res.sendFile(path.join(__dirname, "login.html")); // or login.html
 });
 
 // ✅ Test route
