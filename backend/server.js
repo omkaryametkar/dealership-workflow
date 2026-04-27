@@ -4706,15 +4706,16 @@ app.post("/api/complete-refund", (req,res)=>{
 
 });
 app.get("/api/departments", (req, res) => {
-  res.json([
-    "Sales",
-    "Accounts",
-    "Invoice",
-    "Insurance",
-    "RTO",
-    "Delivery",
-    "Admin"
-  ]);
+  const sql = "SELECT DISTINCT department FROM users";
+  db.query(sql, (err, result) => {
+    if (err) {
+      console.error(err);
+      return res.status(500).json([]);
+    }
+
+    const depts = result.map(r => r.department);
+    res.json(depts);
+  });
 });
 app.post("/api/add-user", (req, res) => {
   const { name, email, password, department, branch } = req.body;
