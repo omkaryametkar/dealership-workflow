@@ -7,28 +7,27 @@ const PDFDocument = require("pdfkit");
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-// ⬇️ PLACE THIS AT VERY END
-app.use(express.static(path.join(__dirname, "..")));
-// ⭐ allow browser to access uploaded files
+// ✅ Serve files from backend folder
+app.use(express.static(__dirname));
 
-const frontendPath = path.join(__dirname, "..");
-app.use(express.static(frontendPath));
-
-// 🔥 Root route → open login page
+// ✅ Root route (ONLY ONE)
 app.get("/", (req, res) => {
-  res.sendFile(path.join(frontendPath, "login.html"));
+  res.sendFile(path.join(__dirname, "admin.html")); // or login.html
 });
 
-app.get("/api", (req, res) => {
-  res.send("✅ API is working");
-});
-// 🔥 Test route (for debugging)
+// ✅ Test route
 app.get("/test", (req, res) => {
   res.send("Test route working");
 });
-/* ------------ OPEN LOGIN PAGE ------------ */
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "../login.html"));
+
+// ✅ API test
+app.get("/api", (req, res) => {
+  res.send("✅ API is working");
+});
+
+// ❗ 404 must be LAST
+app.use((req, res) => {
+  res.status(404).send("Not Found");
 });
 
 /* ------------ MIDDLEWARE ------------ */
