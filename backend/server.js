@@ -5,11 +5,14 @@ const mysql = require("mysql2");
 const multer = require("multer");
 const PDFDocument = require("pdfkit");
 const app = express();
+const fs = require("fs");
 const PORT = process.env.PORT || 3001;
 
 // ✅ Serve files from backend folder
 app.use(express.static(__dirname));
-
+if (!fs.existsSync("uploads")) {
+  fs.mkdirSync("uploads");
+}
 // ✅ Root route (ONLY ONE)
 app.get("/", (req, res) => {
   res.sendFile(path.join(__dirname, "login.html")); // or login.html
