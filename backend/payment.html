@@ -285,7 +285,7 @@ LOGOUT
 
 </div>
 <script>
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
   let payingDue = false;
   let payingRefund = false; 
 function hideAllSections(){
@@ -333,7 +333,7 @@ let payments=[];
 let currentBookingId=null;
 /* 🔄 AUTO SYNC BOOKING → PAYMENT REFER */
 function syncPayment(){
-  return fetch("http://localhost:3001/api/sync-payment",{
+  return fetch(`${BASE_URL}/api/sync-payment`,{
     method:"POST"
   });
 }
@@ -345,7 +345,7 @@ let originalRemaining=0;
 /* ================= LOAD BOOKINGS ================= */
 
 async function loadBookings() {
-  const r = await fetch("http://localhost:3001/api/bookings");
+  const r = await fetch(`${BASE_URL}/api/bookings`);
   const data = await r.json();
 
   bookingTable.innerHTML = "";
@@ -411,7 +411,7 @@ let status = remaining === 0 ? "Completed" : "Pending";
 }
 async function loadTransactionDetails(){
 
-  const r = await fetch("http://localhost:3001/api/bookings");
+  const r = await fetch(`${BASE_URL}/api/bookings`);
   const bookings = await r.json();
 
   let html = `
@@ -452,7 +452,7 @@ async function loadTransactionDetails(){
 }
 
 async function loadPayments(){
-  const r=await fetch("http://localhost:3001/api/payments");
+  const r=await fetch(`${BASE_URL}/api/payments`);
   payments=await r.json();
   // loadBookings();
 }
@@ -463,7 +463,7 @@ async function checkCustomerExist(){
   let customerId = cid.value.trim();
   if(!customerId) return false;
 
-const r = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`);
+const r = await fetch(`${BASE_URL}/api/customer-booking/${customerId}`);
 
   if(r.status !== 200){
     alert("Customer not exist");
@@ -489,7 +489,7 @@ const r = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`
   totalPaymentAmount.toFixed(2);
 
   // ⭐ GET ALREADY PAID AMOUNT FROM BACKEND
-  const payRes = await fetch(`http://localhost:3001/api/payment-history/${b.booking_id}`);
+  const payRes = await fetch(`${BASE_URL}/api/payment-history/${b.booking_id}`);
   const payData = await payRes.json();
 
   previousPaidTotal = payData.total_paid || 0;
@@ -514,7 +514,7 @@ const r = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`
 }
 function loadPaymentData(bookingId){
 
-fetch(`http://localhost:3001/api/get-payment-summary/${bookingId}`)
+fetch(`${BASE_URL}/api/get-payment-summary/${bookingId}`)
 .then(res => res.json())
 .then(data => {
 
@@ -535,7 +535,7 @@ previousPaidTotal = data.paid_amount;
 }
 async function loadOtherList(){
 
-  const r = await fetch("http://localhost:3001/api/get-other-list");
+  const r = await fetch(`${BASE_URL}/api/get-other-list`);
   const data = await r.json();
 
   let html = `
@@ -587,7 +587,7 @@ function calcFinalAmount(){
 async function openOtherForm(customerId, bookingId){
 
   const res = await fetch(
-    `http://localhost:3001/api/get-other-details/${customerId}/${bookingId}`
+    `${BASE_URL}/api/get-other-details/${customerId}/${bookingId}`
   );
 
   const data = await res.json();
@@ -656,7 +656,7 @@ async function saveOtherAmountFinal(){
     return;
   }
 
-  const res = await fetch("http://localhost:3001/api/save-other-amount",{
+  const res = await fetch(`${BASE_URL}/api/save-other-amount`,{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -703,11 +703,11 @@ function calcRemaining(){
 }
 async function loadPendingPayments() {
 
-  const r = await fetch("http://localhost:3001/api/payment-reference");
+  const r = await fetch(`${BASE_URL}/api/payment-reference`);
   const data = await r.json();
 
   // ⭐ get booking status
-  const b = await fetch("http://localhost:3001/api/bookings");
+  const b = await fetch(`${BASE_URL}/api/bookings`);
   const bookings = await b.json();
 
   let rows = "";
@@ -751,7 +751,7 @@ async function savePayment(){
 
   try{
 
-    const res = await fetch("http://localhost:3001/api/add-payment",{
+    const res = await fetch(`${BASE_URL}/api/add-payment`,{
       method:"POST",
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
@@ -784,7 +784,7 @@ async function savePayment(){
     /* ⭐ REFUND COMPLETE API */
     if(payingRefund){
 
-      await fetch("http://localhost:3001/api/complete-refund",{
+      await fetch(`${BASE_URL}/api/complete-refund`,{
         method:"POST",
         headers:{'Content-Type':'application/json'},
         body: JSON.stringify({
@@ -827,7 +827,7 @@ function logout(){
 async function editBooking(customerId){
 
   try{
-    const r = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`);
+    const r = await fetch(`${BASE_URL}/api/customer-booking/${customerId}`);
 
     if(r.status !== 200){
       alert("Customer not found");
@@ -913,7 +913,7 @@ else if(section === "other"){
 
 });
 async function savePaymentReference(b) {
-  await fetch("http://localhost:3001/api/save-payment-reference", {
+  await fetch(`${BASE_URL}/api/save-payment-reference`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -929,7 +929,7 @@ async function savePaymentReference(b) {
 }
 async function loadDocumentsTable() {
 
-  const r = await fetch("http://localhost:3001/api/bookings");
+  const r = await fetch(`${BASE_URL}/api/bookings`);
   const data = await r.json();
 
   let html = `
@@ -964,7 +964,7 @@ async function loadDocumentsTable() {
 
   for (let b of data) {
 
-    const res = await fetch(`http://localhost:3001/api/receipts/${b.booking_id}`);
+    const res = await fetch(`${BASE_URL}/api/receipts/${b.booking_id}`);
     const doc = await res.json();
     const d = doc.documents;
 
@@ -1009,7 +1009,7 @@ async function loadDocumentsTable() {
 }
 async function viewBooking(customerId) {
 
-  const r = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`);
+  const r = await fetch(`${BASE_URL}/api/customer-booking/${customerId}`);
   if (r.status !== 200) {
     alert("Customer not found");
     return;
@@ -1077,7 +1077,7 @@ if (b.booking_status === "Cancelled" && refundAmount > 0) {
 }
 async function viewReceipts(bookingId) {
 
-  const res = await fetch(`http://localhost:3001/api/receipts/${bookingId}`);
+  const res = await fetch(`${BASE_URL}/api/receipts/${bookingId}`);
   const data = await res.json();
 
   const container = document.getElementById("receiptContainer");
@@ -1154,7 +1154,7 @@ function togglePDF(fileName, divId){
     div.style.display = "block";
     div.innerHTML = `
       <iframe 
-        src="http://localhost:3001/uploads/${fileName}" 
+        src="${BASE_URL}/uploads/${fileName}" 
         width="100%" 
         height="500px">
       </iframe>
@@ -1183,13 +1183,13 @@ function uploadPaymentReceipt(bookingId) {
   const formData = new FormData();
   formData.append("receipt_file", file);
 
-  fetch(`http://localhost:3001/api/upload-payment-receipt/${bookingId}`, {
+  fetch(`${BASE_URL}/api/upload-payment-receipt/${bookingId}`, {
     method: "POST",
     body: formData
   })
 }
 function viewReceipt(filename) {
-  window.open(`http://localhost:3001/uploads/${filename}`, "_blank");
+  window.open(`${BASE_URL}/uploads/${filename}`, "_blank");
 }
 /* 📄 OPEN RECEIPT PDF */
 function openPDF(fileName)
@@ -1199,13 +1199,13 @@ function openPDF(fileName)
     return;
   }
 
-  const url = "http://localhost:3001/uploads/" + fileName;
+  const url = `${BASE_URL}/uploads/${fileName}`;
   window.open(url, "_blank");
 }
 
 function openBookingPDF(customerId) {
   window.open(
-    `http://localhost:3001/api/download-booking-pdf/${customerId}`,
+    `${BASE_URL}/api/download-booking-pdf/${customerId}`,
     "_blank"
   );
 }
@@ -1214,24 +1214,24 @@ showAddPayment();
 document.querySelector('[data-section="addPayment"]').classList.add("active");
 
 function downloadReceipt(paymentId){
-  window.open(`http://localhost:3001/api/download-payment/${paymentId}`, "_blank");
+  window.open(`${BASE_URL}/api/download-payment/${paymentId}`, "_blank");
 }
 function viewTransaction(customerId){
   window.open(
-    `http://localhost:3001/api/download-transaction-receipt/${customerId}?mode=view`,
+    `${BASE_URL}/api/download-transaction-receipt/${customerId}?mode=view`,
     "_blank"
   );
 }
 
 function downloadTransaction(customerId){
   window.open(
-    `http://localhost:3001/api/download-transaction-receipt/${customerId}?mode=download`,
+    `${BASE_URL}/api/download-transaction-receipt/${customerId}?mode=download`,
     "_blank"
   );
 }
 async function loadRefunds(){
 
-const r = await fetch("http://localhost:3001/api/cancelled-booking-refunds");
+const r = await fetch(`${BASE_URL}/api/cancelled-booking-refunds`);
 const data = await r.json();
 
 let html = `
@@ -1289,7 +1289,7 @@ html += "</table>";
 
 /* ⭐ ACCESSORIES REFUND */
 
-const r2 = await fetch("http://localhost:3001/api/account-status");
+const r2 = await fetch(`${BASE_URL}/api/account-status`);
 const acc = await r2.json();
 
 html += `
@@ -1341,7 +1341,7 @@ document.getElementById("refundSection").innerHTML = html;
 }
 async function loadCompletedPayments(){
 
-  const r = await fetch("http://localhost:3001/api/bookings");
+  const r = await fetch(`${BASE_URL}/api/bookings`);
   const data = await r.json();
 
   let html = `
@@ -1395,7 +1395,7 @@ async function loadCompletedPayments(){
 async function uploadForLatestPayment(bookingId){
 
   // 1️⃣ get latest payment id
-  const r = await fetch(`http://localhost:3001/api/latest-payment/${bookingId}`);
+  const r = await fetch(`${BASE_URL}/api/latest-payment/${bookingId}`);
   const data = await r.json();
 
   if(!data.payment_id){
@@ -1413,7 +1413,7 @@ async function uploadForLatestPayment(bookingId){
     const formData = new FormData();
     formData.append("receipt_file", file);
 
-    fetch(`http://localhost:3001/api/upload-payment-receipt/${data.payment_id}`,{
+    fetch(`${BASE_URL}/api/upload-payment-receipt/${data.payment_id}`,{
       method:"POST",
       body: formData
     })
@@ -1429,7 +1429,7 @@ async function loadDue(){
 
   document.getElementById("dueSection").innerHTML = "";
 
-  const r = await fetch("http://localhost:3001/api/account-status");
+  const r = await fetch(`${BASE_URL}/api/account-status`);
   const dueData = await r.json();
 
   console.log("DUE DATA:", dueData);
@@ -1482,7 +1482,7 @@ async function completeRefund(customerId, bookingId){
 
   if(!confirm("Confirm refund completed?")) return;
 
-  const res = await fetch("http://localhost:3001/api/complete-refund",{
+  const res = await fetch(`${BASE_URL}/api/complete-refund`,{
     method:"POST",
     headers:{'Content-Type':'application/json'},
     body: JSON.stringify({
@@ -1509,7 +1509,7 @@ async function goToPayment(customerId){
 
   document.getElementById("cid").value = customerId;
 
-  const bookingRes = await fetch(`http://localhost:3001/api/customer-booking/${customerId}`);
+  const bookingRes = await fetch(`${BASE_URL}/api/customer-booking/${customerId}`);
   const booking = await bookingRes.json();
 
   document.getElementById("total").value = Number(booking.total_amount).toFixed(2);
@@ -1517,7 +1517,7 @@ async function goToPayment(customerId){
 
   currentBookingId = booking.booking_id;
 
-  const r = await fetch("http://localhost:3001/api/account-status");
+  const r = await fetch(`${BASE_URL}/api/account-status`);
   const data = await r.json();
 
   const dueCustomer = data.find(d => 
@@ -1544,7 +1544,7 @@ async function goToRefund(customerId){
   document.getElementById("cid").value = customerId;
 
   const bookingRes =
-  await fetch(`http://localhost:3001/api/customer-booking/${customerId}`);
+  await fetch(`${BASE_URL}/api/customer-booking/${customerId}`);
 
   const booking = await bookingRes.json();
 
@@ -1556,7 +1556,7 @@ async function goToRefund(customerId){
 
   currentBookingId = booking.booking_id;
 
-  const r = await fetch("http://localhost:3001/api/account-status");
+  const r = await fetch(`${BASE_URL}/api/account-status`);
   const data = await r.json();
 
   const refundCustomer = data.find(d =>
@@ -1569,7 +1569,7 @@ async function goToRefund(customerId){
 
     // ⭐ NEW LOGIC (AUTO CALCULATE REFUND)
     const payRes =
-    await fetch(`http://localhost:3001/api/payment-history/${booking.booking_id}`);
+    await fetch(`${BASE_URL}/api/payment-history/${booking.booking_id}`);
 
     const payData = await payRes.json();
 
