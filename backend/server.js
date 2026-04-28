@@ -169,7 +169,6 @@ db.query(sql, (err, result) => {
 });
 
 });
-/* ------------ ADD BOOKING ------------ */
 app.post(
   "/api/add-booking",
   upload.fields([
@@ -179,76 +178,98 @@ app.post(
   ]),
   (req, res) => {
 
-    const data = req.body;
+    try {
+      const data = req.body || {};
 
-    const sql = `
-      INSERT INTO bookings 
-      (customer_id, customer_name, mobile_number, vehicle_model, booking_date, booking_amount, total_amount, booking_status)
-      VALUES (?,?,?,?,?,?,?,?)
-    `;
+      // ⭐ FILES SAFE CHECK
+      const aadhaarFile = req.files?.aadhaar_file?.[0]?.filename || null;
+      const panFile = req.files?.pan_file?.[0]?.filename || null;
+      const receiptFile = req.files?.receipt_file?.[0]?.filename || null;
 
-    db.query(sql, [
-      data.customer_id,
-      data.customer_name,
-      data.mobile_number,
-      data.vehicle_model,
-      data.booking_date,
-      data.booking_amount,
-      data.total_amount,
-      data.booking_status
-    ], (err, result) => {
-
-      if (err) {
-        if (err.code === "ER_DUP_ENTRY") {
-          return res.status(400).json({
-            message: "Customer ID already exists. Cannot create duplicate booking."
-          });
-        }
-        return res.status(500).json({ message: "Server error" });
-      }
-
-      const bookingId = result.insertId;
-
-
-   // 🔥 Automatically start SALES department
-const insertQuery = `
-INSERT INTO department_tat
-(customer_id, booking_id, department, start_time)
-VALUES (?, ?, 'Sales', NOW())
-`;
-
-db.query(insertQuery,[data.customer_id, bookingId],(errInsert)=>{
-  if (errInsert) {
-    console.error("Sales insert error:", errInsert);
-  }
-});
-
-      // ⭐ GET FILE NAMES FROM MULTER
-      const aadhaarFile = req.files["aadhaar_file"]?.[0]?.filename || null;
-      const panFile = req.files["pan_file"]?.[0]?.filename || null;
-      const receiptFile = req.files["receipt_file"]?.[0]?.filename || null;
-
-      // ⭐ INSERT INTO DOCUMENT TABLE
-      const docSql = `
-        INSERT INTO booking_documents 
-        (booking_id, aadhaar_file, pan_file, receipt_file)
-        VALUES (?,?,?,?)
+      // ⭐ INSERT BOOKING
+      const sql = `
+        INSERT INTO bookings 
+        (customer_id, customer_name, mobile_number, vehicle_model, booking_date, booking_amount, total_amount, booking_status)
+        VALUES (?,?,?,?,?,?,?,?)
       `;
 
-      db.query(docSql, [bookingId, aadhaarFile, panFile, receiptFile], (docErr) => {
-        if (docErr) {
-          console.log(docErr);
-          return res.status(500).json({ message: "Documents save failed" });
+      db.query(sql, [
+        data.customer_id,
+        data.customer_name,
+        data.mobile_number,
+        data.vehicle_model,
+        data.booking_date,
+        data.booking_amount,
+        data.total_amount,
+        data.booking_status
+      ], (err, result) => {
+
+        if (err) {
+          console.error("Booking insert error:", err);
+
+          if (err.code === "ER_DUP_ENTRY") {
+            return res.status(400).json({
+              message: "Customer ID already exists. Cannot create duplicate booking."
+            });
+          }
+
+          return res.status(500).json({
+            message: "Booking insert failed"
+          });
         }
 
-        res.json({
-          message: "Booking + Documents saved successfully ✅",
-          bookingId: bookingId
-        });
+        const bookingId = result.insertId;
+
+        // ⭐ INSERT DOCUMENTS (SAFE)
+        const docSql = `
+          INSERT INTO booking_documents 
+          (booking_id, aadhaar_file, pan_file, receipt_file)
+          VALUES (?,?,?,?)
+        `;
+
+        db.query(docSql,
+          [bookingId, aadhaarFile, panFile, receiptFile],
+          (docErr) => {
+
+            if (docErr) {
+              console.error("Document insert error:", docErr);
+              // still continue (don’t crash API)
+            }
+
+            // ⭐ SEND RESPONSE FIRST (IMPORTANT FOR RAILWAY STABILITY)
+            res.json({
+              message: "Booking saved successfully ✅",
+              bookingId: bookingId
+            });
+
+            // ⭐ DEPARTMENT TAT (RUN IN BACKGROUND, SAFE)
+            const insertQuery = `
+              INSERT INTO department_tat
+              (customer_id, booking_id, department, start_time)
+              VALUES (?, ?, 'Sales', NOW())
+            `;
+
+            db.query(insertQuery,
+              [data.customer_id, bookingId],
+              (deptErr) => {
+                if (deptErr) {
+                  console.error("Sales department insert error:", deptErr);
+                }
+              }
+            );
+
+          }
+        );
       });
 
-    });
-});
+    } catch (error) {
+      console.error("Unexpected server error:", error);
+      return res.status(500).json({
+        message: "Unexpected server error"
+      });
+    }
+  }
+);
 app.post(
   "/api/upload-documents/:booking_id",
   upload.fields([
