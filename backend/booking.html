@@ -248,7 +248,7 @@ New Booking
 </div>
 
 <script>
-// 🚀 START SALES TIME WHEN BOOKING PAGE OPENS
+ const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 window.onload = function () {
 
   // After login, you will NOT have booking_id yet (because user hasn't saved booking)
@@ -264,7 +264,7 @@ window.onload = function () {
   }
 
   // For UPDATE mode → Start TAT now
-  fetch("http://localhost:3001/api/start-department", {
+  fetch(`${BASE_URL}/api/start-department`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -285,7 +285,7 @@ function closeUploadModal() {
   loadBookings();
 async function saveBooking() {
   // 🔍 CHECK IF CUSTOMER ID ALREADY EXISTS BEFORE SAVING
-const checkRes = await fetch("http://localhost:3001/api/bookings");
+const checkRes = await fetch(`${BASE_URL}/api/bookings`);
 const allBookings = await checkRes.json();
 
 const exists = allBookings.some(b => b.customer_id == customer_id.value);
@@ -321,7 +321,7 @@ if (!booking_id.value && exists) {
 
     // UPDATE
     if (booking_id.value) {
-      const res = await fetch("http://localhost:3001/api/update-booking/" + booking_id.value, {
+      const res = await fetch(`${BASE_URL}/api/update-booking/${booking_id.value}`, {
         method: "PUT",
         body: formData
       });
@@ -339,7 +339,7 @@ if (!booking_id.value && exists) {
     }
     // ADD NEW
     else {
-      const res = await fetch("http://localhost:3001/api/add-booking", {
+      const res = await fetch(`${BASE_URL}/api/add-booking`, {
         method: "POST",
         body: formData
       });
@@ -358,7 +358,7 @@ if (!booking_id.value && exists) {
 // 🔥 Only call department APIs if BookingId exists
 if (finalBookingId) {
 
-  await fetch("http://localhost:3001/api/end-department", {
+  await fetch(`${BASE_URL}/api/end-department`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -384,7 +384,7 @@ if (finalBookingId) {
 }
 async function loadBookings() {
 
-  const res = await fetch("http://localhost:3001/api/bookings");
+  const res = await fetch(`${BASE_URL}/api/bookings`);
   if (!res.ok) {
   const text = await res.text();
   console.error(text);
@@ -471,7 +471,7 @@ if (b.receipt_file && b.receipt_file !== "null") {
 
 function showModalById(id) {
 
-  fetch("http://localhost:3001/api/bookings")
+  fetch(`${BASE_URL}/api/bookings`)
     .then(res => res.json())
     .then(data => {
 
@@ -548,7 +548,7 @@ document.getElementById("viewModal").style.display = "block";
     const id = document.getElementById("view_booking_id").value;
     if (!id) return alert("Please enter a Booking ID");
 
-    const res = await fetch("http://localhost:3001/api/bookings");
+    const res = await fetch(`${BASE_URL}/api/bookings`);
     const data = await res.json();
     const b = data.find(item => item.booking_id == id);
 
@@ -618,7 +618,7 @@ async function uploadDocs() {
   if (receiptFile) formData.append("receipt_file", receiptFile);
 
   try {
-    const res = await fetch(`http://localhost:3001/api/upload-documents/${selectedBookingId}`, {
+    const res = await fetch(`${BASE_URL}/api/upload-documents/${selectedBookingId}`, {
       method: "POST",
       body: formData
     });
@@ -670,7 +670,7 @@ async function uploadDocs() {
     return;
   }
 
-  const res = await fetch("http://localhost:3001/api/cancel-booking", {
+  const res = await fetch(`${BASE_URL}/api/cancel-booking`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({
@@ -691,7 +691,7 @@ async function uploadDocs() {
   }
 }
 function downloadReceipt(bookingId) {
-  window.open(`http://localhost:3001/api/download-receipt/${bookingId}`, "_blank");
+  window.open(`${BASE_URL}/api/download-receipt/${bookingId}`, "_blank");
 }
 function viewDocument(filename){
 
@@ -700,7 +700,7 @@ function viewDocument(filename){
     return;
   }
 
-  const fileUrl = "http://localhost:3001/uploads/" + filename;
+  const fileUrl = `${BASE_URL}/uploads/${filename}`;
 
   window.open(fileUrl, "_blank");   // open in new tab
 
@@ -713,7 +713,7 @@ document.getElementById("customer_id").addEventListener("input", async function 
   if (enteredId === "") return;
 
 
-  const res = await fetch("http://localhost:3001/api/bookings");
+  const res = await fetch(`${BASE_URL}/api/bookings`);
   const data = await res.json();
 
   // Check existing ID
