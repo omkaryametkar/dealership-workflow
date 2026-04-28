@@ -1201,7 +1201,7 @@ function formatDate(dateStr){
 }
 function startDepartment(customerId, bookingId, department){
 
-  fetch("http://localhost:3001/api/start-department", {
+  fetch(`${BASE_URL}/api/start-department`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json"
@@ -1225,7 +1225,7 @@ function startDepartment(customerId, bookingId, department){
 }
 function endDepartment(customerId, bookingId, department){
 
-fetch("http://localhost:3001/api/end-department",{
+fetch(`${BASE_URL}/api/end-department`,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -1258,7 +1258,7 @@ function closeAddUser(){
 
 
 function loadUsers(){
-  fetch("http://localhost:3001/api/users")
+  fetch(`${BASE_URL}/api/users`)
   .then(res => res.json())
   .then(data => {
 
@@ -1317,7 +1317,7 @@ function addUser(){
  
   if(window.editUserId){
 
-    fetch(`http://localhost:3001/api/update-user/${window.editUserId}`, {
+    fetch(`${BASE_URL}/api/update-user/${window.editUserId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, email, department, branch })
@@ -1338,7 +1338,7 @@ function addUser(){
       return;
     }
 
-    fetch("http://localhost:3001/api/add-user", {
+    fetch(`${BASE_URL}/api/add-user`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
      body: JSON.stringify({ name, email, password, department, branch })
@@ -1361,7 +1361,7 @@ function deleteUser(id){
 
   if(!confirm("Are you sure you want to delete this user?")) return;
 
-  fetch(`http://localhost:3001/api/delete-user/${id}`, {
+  fetch(`${BASE_URL}/api/delete-user/${id}`, {
     method: "DELETE"
   })
   .then(res => res.json())
@@ -1411,7 +1411,7 @@ function closeAddBranch(){
 }
 
 function loadBranches(){
-  fetch("http://localhost:3001/api/branches")
+  fetch(`${BASE_URL}/api/branches`)
   .then(res => res.json())
   .then(data => {
 
@@ -1454,7 +1454,7 @@ function addBranch(){
   
   if(window.editBranchId){
 
-    fetch(`http://localhost:3001/api/update-branch/${window.editBranchId}`, {
+    fetch(`${BASE_URL}/api/update-branch/${window.editBranchId}`, {
       method: "PUT",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, address })
@@ -1470,7 +1470,7 @@ function addBranch(){
   } 
   else {
     
-    fetch("http://localhost:3001/api/add-branch", {
+    fetch(`${BASE_URL}/api/add-branch`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ name, address })
@@ -1488,7 +1488,7 @@ function deleteBranch(id){
 
   if(!confirm("Delete this branch?")) return;
 
-  fetch(`http://localhost:3001/api/delete-branch/${id}`, {
+  fetch(`${BASE_URL}/api/delete-branch/${id}`, {
     method: "DELETE"
   })
   .then(res => res.json())
@@ -1514,7 +1514,7 @@ function showExport(){
 }
 function loadExportDepartments(){
 
-  fetch("http://localhost:3001/api/workflow-summary")
+  fetch(`${BASE_URL}/api/workflow-summary`)
   .then(res => res.json())
   .then(res => {
 
@@ -1681,7 +1681,7 @@ function loadTopRated(){
 
   const filter = document.getElementById("salesFilterType").value;
 
-  fetch(`http://localhost:3001/api/top-sales?filter=${filter}`)
+  fetch(`${BASE_URL}/api/top-sales?filter=${filter}`)
   .then(res => res.json())
   .then(data => {
 
@@ -1724,7 +1724,7 @@ function applySalesFilter(){
 
   const type = document.getElementById("salesFilterType").value;
 
-  fetch(`http://localhost:3001/api/top-sales?filter=${type}`)
+  fetch(`${BASE_URL}/api/top-sales?filter=${type}`)
   .then(res => res.json())
   .then(data => {
 
