@@ -144,10 +144,10 @@ Add FASTag
 </div>
 
 <script>
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 function loadFastag(){
 
-fetch("http://localhost:3001/api/get-fastag")
+fetch(`${BASE_URL}/api/get-fastag`)
 
 .then(res=>res.json())
 
@@ -195,7 +195,7 @@ alert("Please fill all fields");
 return;
 }
 
-fetch("http://localhost:3001/api/add-fastag",{
+fetch(`${BASE_URL}/api/add-fastag`,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"

@@ -172,7 +172,7 @@ onchange="checkAccessories()">
 </div>
 
 <script>
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 let editMode = false;
 let editCustomerId = null;
 let editBookingId = null;
@@ -212,8 +212,8 @@ formData.append("receipt",receipt);
 }
 
 let url = editMode
-? "http://localhost:3001/update-accessories"
-: "http://localhost:3001/add-accessories";
+? `${BASE_URL}/update-accessories`
+: `${BASE_URL}/add-accessories`;
 
 fetch(url,{
 method:"POST",
@@ -300,7 +300,7 @@ loadAccessories();
 
 function loadAccessories(){
 
-fetch("http://localhost:3001/get-accessories")
+fetch(`${BASE_URL}/api/get-accessories`)
 
 .then(res=>res.json())
 
@@ -352,7 +352,7 @@ if(!customerId || !bookingId){
 return;
 }
 
-fetch("http://localhost:3001/check-accessories",{
+fetch(`${BASE_URL}/api/check-accessories`,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
@@ -398,7 +398,7 @@ alert("No receipt uploaded");
 return;
 }
 
-window.open("http://localhost:3001/uploads/" + file,"_blank");
+window.open(`${BASE_URL}/uploads/${file}`, "_blank");
 
 }
 
@@ -411,7 +411,7 @@ return;
 
 let link=document.createElement("a");
 
-link.href="http://localhost:3001/uploads/" + file;
+link.href="${BASE_URL}/uploads/${file}";
 
 link.download=file;
 

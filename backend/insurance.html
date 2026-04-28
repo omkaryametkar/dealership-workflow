@@ -164,14 +164,14 @@ td {
 </div>
 <script>
   
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 let selectedCustomer = null; // store validated customer
 
 async function loadInsurance() {
   const table = document.getElementById("insuranceTable");
   while (table.rows.length > 1) table.deleteRow(1);
 
-  const res = await fetch("http://localhost:3001/api/insurance");
+  const res = await fetch(`${BASE_URL}/api/insurance`);
   const data = await res.json();
 
   window.allCustomers = data; // store globally
@@ -237,7 +237,7 @@ if (row.status === "Completed") {
 async function editInsurance(customer_id) {
 
   const res = await fetch(
-    `http://localhost:3001/api/insurance-details/${customer_id}`
+    `${BASE_URL}/api/insurance-details/${customer_id}`
   );
   const data = await res.json();
 
@@ -311,7 +311,7 @@ const customer = window.allCustomers.find(
 
 }
 async function viewReceipt(customer_id) {
-  const res = await fetch("http://localhost:3001/api/insurance-details/" + customer_id);
+  const res = await fetch(`${BASE_URL}/api/insurance-details/${customer_id}`);
   const data = await res.json();
 
   if (data.length === 0) {
@@ -332,17 +332,17 @@ async function viewReceipt(customer_id) {
     <hr>
     <h4>All Previous Receipts</h4>
 
-    <button onclick="window.open('http://localhost:3001/api/download-booking-pdf/${d.customer_id}?type=view', '_blank')">
+    <button onclick="window.open('${BASE_URL}/api/download-booking-pdf/${d.customer_id}?type=view', '_blank')">
       Open Booking Receipt
     </button>
 
     <button style="margin-top:8px;"
-      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${d.customer_id}?mode=view', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-transaction-receipt/${d.customer_id}?mode=view', '_blank')">
       Open Payment Receipt
     </button>
 
     <button style="margin-top:8px;"
-      onclick="openInvoice(${d.customer_id})">
+      onclick="window.open('${BASE_URL}/api/download-invoice-pdf/${d.customer_id}?type=view', '_blank')">
       Invoice Receipt
     </button>
   `;
@@ -362,7 +362,7 @@ async function saveInsurance(){
     return;
   }
 
-  const res = await fetch("http://localhost:3001/api/save-insurance", {
+  const res = await fetch(`${BASE_URL}/api/save-insurance`, {
   method: "POST",
   headers:{
     "Content-Type":"application/json"
@@ -388,7 +388,7 @@ async function saveInsurance(){
 }
 
 window.onload = async () => {
-  await fetch("http://localhost:3001/api/sync-insurance",{method:"POST"});
+  await fetch(`${BASE_URL}/api/sync-insurance`, {method:"POST"});
   loadInsurance();
 };
 document.getElementById("logoutBtn").onclick = function(e){
@@ -404,7 +404,7 @@ function closePopup() {
 
 function viewInsurancePDF(customer_id) {
   window.open(
-    "http://localhost:3001/api/download-insurance-pdf/" + customer_id + "?type=view",
+    `${BASE_URL}/api/download-insurance-pdf/${customer_id}?type=view`,
     "_blank"
   );
 }
@@ -412,13 +412,13 @@ function viewInsurancePDF(customer_id) {
 
 function downloadInsurancePDF(customer_id) {
   window.open(
-    "http://localhost:3001/api/download-insurance-pdf/" + customer_id + "?type=download",
+    `${BASE_URL}/api/download-insurance-pdf/${customer_id}?type=download`,
     "_blank"
   );
 }
 function openBookingPDF(customer_id) {
   window.open(
-    "http://localhost:3001/api/download-booking-pdf/" + customer_id + "?type=view",
+    `${BASE_URL}/api/download-booking-pdf/${customer_id}?type=view`,
     "_blank"
   );
 }
@@ -426,7 +426,7 @@ function openBookingPDF(customer_id) {
 
 function openPaymentPDF(customer_id) {
   window.open(
-    "http://localhost:3001/api/download-transaction-receipt/" + customer_id + "?mode=view",
+    `${BASE_URL}/api/download-transaction-receipt/${customer_id}?mode=view`,
     "_blank"
   );
 }
@@ -434,7 +434,7 @@ function openPaymentPDF(customer_id) {
 
 function openInvoicePDF(customer_id) {
   window.open(
-    "http://localhost:3001/api/download-invoice-pdf/" + customer_id + "?type=view",
+    `${BASE_URL}/api/download-invoice-pdf/${customer_id}?type=view`,
     "_blank"
   );
 }

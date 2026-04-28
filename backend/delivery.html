@@ -148,6 +148,7 @@ button{
 </div>
 
 <script>
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 let selectedCustomerId=null;
 
 function logout(){
@@ -155,11 +156,11 @@ function logout(){
 }
 
 function syncDelivery(){
-  return fetch("http://localhost:3001/api/sync-delivery",{method:"POST"});
+  return fetch(`${BASE_URL}/api/sync-delivery`,{method:"POST"});
 }
 
 function loadDelivery(){
-  fetch("http://localhost:3001/api/delivery")
+  fetch(`${BASE_URL}/api/delivery`)
   .then(res=>res.json())
   .then(data=>{
     const tbody=document.querySelector("#deliveryTable tbody");
@@ -181,7 +182,7 @@ function loadDelivery(){
 function viewDetails(id){
   selectedCustomerId=id;
 
-  fetch("http://localhost:3001/api/customer-full-details/"+id)
+  fetch(`${BASE_URL}/api/customer-full-details/${id}`)
   .then(res=>res.json())
   .then(d=>{
     document.getElementById("modal").style.display="block";
@@ -258,27 +259,27 @@ function allReceipt(customer_id){
     ">
 
       <button class="receipt-btn"
-        onclick="window.open('http://localhost:3001/api/download-booking-pdf/${customer_id}', '_blank')">
+        onclick="window.open('${BASE_URL}/api/download-booking-pdf/${customer_id}', '_blank')">
         Booking
       </button>
 
       <button class="receipt-btn"
-       onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${customer_id}?mode=view', '_blank')">
+       onclick="window.open('${BASE_URL}/api/download-transaction-receipt/${customer_id}?mode=view', '_blank')">
         Payment
       </button>
 
       <button class="receipt-btn"
-        onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${customer_id}', '_blank')">
+        onclick="window.open('${BASE_URL}/api/download-invoice-pdf/${customer_id}', '_blank')">
         Invoice
       </button>
 
       <button class="receipt-btn"
-        onclick="window.open('http://localhost:3001/api/download-insurance-pdf/${customer_id}', '_blank')">
+        onclick="window.open('${BASE_URL}/api/download-insurance-pdf/${customer_id}', '_blank')">
         Insurance
       </button>
 
       <button class="receipt-btn"
-        onclick="window.open('http://localhost:3001/api/download-rto-pdf/${customer_id}', '_blank')">
+        onclick="window.open('${BASE_URL}/api/download-rto-pdf/${customer_id}', '_blank')">
         RTO
       </button>
 
@@ -308,7 +309,7 @@ function updateCheckboxes(){
 }
 
 function markDelivered(){
-  fetch("http://localhost:3001/api/delivery-complete/"+selectedCustomerId,{method:"PUT"})
+  fetch(`${BASE_URL}/api/delivery-complete/${selectedCustomerId}`, {method:"PUT"})
   .then(()=>{
     loadDelivery();
     closeModal();

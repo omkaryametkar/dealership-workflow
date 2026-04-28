@@ -200,12 +200,12 @@ button{
 </div>
 
 <script>
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 window.onload = async function(){
 
-  await fetch("http://localhost:3001/api/sync-rto", { method: "POST" });
+  await fetch(`${BASE_URL}/api/sync-rto`, { method: "POST" });
 
-  const res = await fetch("http://localhost:3001/api/get-rto-customers");
+  const res = await fetch(`${BASE_URL}/api/get-rto-customers`);
   const data = await res.json();
 
   const tbody = document.querySelector("#rtoTable tbody");
@@ -260,7 +260,7 @@ async function checkCustomer(){
   const customer_id = document.getElementById("customer_id").value.trim();
   if(!customer_id) return;
 
-  const res = await fetch(`http://localhost:3001/api/check-rto/${customer_id}`);
+  const res = await fetch(`${BASE_URL}/api/check-rto/${customer_id}`);
   const data = await res.json();
 
   // RESET
@@ -304,7 +304,7 @@ async function saveRTO(){
     return;
   }
 
-  const res = await fetch("http://localhost:3001/api/save-rto",{
+  const res = await fetch(`${BASE_URL}/api/save-rto`,{
     method:"POST",
     headers:{ "Content-Type":"application/json" },
     body:JSON.stringify({
@@ -332,22 +332,22 @@ function viewAllReceipts(customerId) {
     <hr><h3>All Receipts</h3><br>
 
     <button class="view-btn"
-      onclick="window.open('http://localhost:3001/api/download-booking-pdf/${customerId}', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-booking-pdf/${customerId}', '_blank')">
       Booking Receipt (PDF)
     </button><br><br>
 
     <button class="view-btn"
-      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${customerId}?mode=view', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-transaction-receipt/${customerId}?mode=view', '_blank')">
       Payment Receipt (PDF)
     </button><br><br>
 
     <button class="view-btn"
-      onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${customerId}', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-invoice-pdf/${customerId}', '_blank')">
       Invoice Receipt (PDF)
     </button><br><br>
 
     <button class="view-btn"
-      onclick="window.open('http://localhost:3001/api/download-insurance-pdf/${customerId}', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-insurance-pdf/${customerId}', '_blank')">
       Insurance Receipt (PDF)
     </button><br><br>
   `;
@@ -356,7 +356,7 @@ function viewAllReceipts(customerId) {
 }
 async function editRTO(customer_id){
 
-  const res = await fetch(`http://localhost:3001/api/rto-details/${customer_id}`);
+  const res = await fetch(`${BASE_URL}/api/rto-details/${customer_id}`);
   const data = await res.json();
 
   if(!data){
@@ -379,13 +379,13 @@ async function editRTO(customer_id){
 // VIEW RTO RECEIPT PDF
 //////////////////////////////////////////////////////
 function viewRTOReceipt(file){
-  window.open(`http://localhost:3001/uploads/${file}`, "_blank");
+  window.open(`${BASE_URL}/uploads/${file}`, "_blank");
 }
 async function viewRTO(customer_id){
 
   currentCustomerId = customer_id;
 
-  const res = await fetch(`http://localhost:3001/api/view-rto-details/${customer_id}`);
+  const res = await fetch(`${BASE_URL}/api/view-rto-details/${customer_id}`);
   const data = await res.json();
 
   if(!data){
@@ -412,14 +412,14 @@ function downloadRTO(){
   }
 
   // ⭐ This triggers real browser download
-  window.location.href = `http://localhost:3001/api/download-rto/${currentCustomerId}`;
+  window.location.href = `${BASE_URL}/api/download-rto/${currentCustomerId}`;
 }
 function openRtoPDF(customer_id) {
-  window.open(`http://localhost:3001/api/download-rto-pdf/${customer_id}`, "_blank");
+  window.open(`${BASE_URL}/api/download-rto-pdf/${customer_id}`, "_blank");
 }
 
 function downloadRtoPDF(customer_id) {
-  window.location.href = `http://localhost:3001/api/download-rto/${customer_id}`;
+  window.location.href = `${BASE_URL}/api/download-rto/${customer_id}`;
 }
 </script>
 <div id="rtoModal" class="modal">

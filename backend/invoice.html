@@ -165,14 +165,14 @@ td{
 </div>
 
 <script>
-
+const BASE_URL = "https://dealership-workflow-production.up.railway.app";
 async function checkCustomerExists() {
 
   const customerId = document.getElementById("customer_id").value.trim();
   if(customerId === "") return false;
 
   try {
-    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookingRes = await fetch(`${BASE_URL}/api/bookings`);
     const bookings = await bookingRes.json();
 
     const booking = bookings.find(b => Number(b.customer_id) === Number(customerId));
@@ -217,7 +217,7 @@ async function validateAndSaveInvoice() {
   }
 
   try {
-    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookingRes = await fetch(`${BASE_URL}/api/bookings`);
     const bookings = await bookingRes.json();
 
     // Removed payment fetching and validation
@@ -248,7 +248,7 @@ async function validateAndSaveInvoice() {
   status: document.getElementById("status").value
 };
 
-  fetch("http://localhost:3001/saveInvoice", {
+  fetch(`${BASE_URL}/saveInvoice`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify(data)
@@ -270,9 +270,9 @@ async function loadCompletedPayments(){
   const table = document.getElementById("readyInvoiceTable");
   while(table.rows.length > 1){ table.deleteRow(1); }
   try{
-    const bookingRes = await fetch("http://localhost:3001/api/bookings");
+    const bookingRes = await fetch(`${BASE_URL}/api/bookings`);
     const bookings = await bookingRes.json();
-    const paymentRes = await fetch("http://localhost:3001/api/payments");
+    const paymentRes = await fetch(`${BASE_URL}/api/payments`);
     const payments = await paymentRes.json();
     payments.forEach(payment=>{
       if(Number(payment.remaining_amount) === 0){
@@ -299,8 +299,8 @@ async function loadCompletedPayments_FIXED(){
 
   try {
 
-    const bookings = await fetch("http://localhost:3001/api/bookings").then(r=>r.json());
-    const payments = await fetch("http://localhost:3001/api/payments").then(r=>r.json());
+    const bookings = await fetch(`${BASE_URL}/api/bookings`).then(r=>r.json());
+    const payments = await fetch(`${BASE_URL}/api/payments`).then(r=>r.json());
 
     console.log("Bookings:", bookings);
     console.log("Payments:", payments);
@@ -329,7 +329,7 @@ async function loadCompletedPayments_FIXED(){
 }
 
 function viewTransaction(bookingId){
-  window.open(`http://localhost:3001/api/download-transaction-receipt/${bookingId}?mode=view`, "_blank");
+  window.open(`${BASE_URL}/api/download-transaction-receipt/${bookingId}?mode=view`, "_blank");
 }
 async function loadInvoiceTable() {
 
@@ -342,9 +342,9 @@ async function loadInvoiceTable() {
 
   try {
 
-    const invoiceRes = await fetch("http://localhost:3001/api/invoice-refer");
+    const invoiceRes = await fetch(`${BASE_URL}/api/invoice-refer`);
     const invoiceData = await invoiceRes.json();
-    const receiptRes = await fetch("http://localhost:3001/api/invoice-receipts-all");
+    const receiptRes = await fetch(`${BASE_URL}/api/invoice-receipts-all`);
       const receiptData = await receiptRes.json();
 
     invoiceData.forEach(row => {
@@ -391,7 +391,7 @@ if (receipt) {
 }
 function openReceipt(fileName) {
   window.open(
-    `http://localhost:3001/uploads/${fileName}`,
+    `${BASE_URL}/uploads/${fileName}`,
     "_blank"
   );
 }
@@ -401,12 +401,12 @@ const allReceiptCell = tr.insertCell();
 allReceiptCell.innerHTML = `
   <div style="display:flex;flex-direction:row;gap:8px;justify-content:center">
     <button class="small-btn view-btn"
-      onclick="window.open('http://localhost:3001/api/download-booking-pdf/${row.customer_id}', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-booking-pdf/${row.customer_id}', '_blank')">
       Booking
     </button>
 
     <button class="small-btn view-btn"
-      onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${row.customer_id}?mode=view', '_blank')">
+      onclick="window.open('${BASE_URL}/api/download-transaction-receipt/${row.customer_id}?mode=view', '_blank')">
       Payment
     </button>
   </div>
@@ -424,7 +424,7 @@ if (row.status === "Completed") {
      
 
       <button class="small-btn upload-btn"
-       onclick="window.open('http://localhost:3001/api/download-invoice-pdf/${row.customer_id}?type=download', '_blank')">
+       onclick="window.open('${BASE_URL}/api/download-invoice-pdf/${row.customer_id}?type=download', '_blank')">
         Download
       </button>
 
@@ -468,7 +468,7 @@ async function editInvoice(customerId){
 
   try{
 
-   const res = await fetch(`http://localhost:3001/api/invoice-by-customer/${customerId}`);
+   const res = await fetch(`${BASE_URL}/api/invoice-by-customer/${customerId}`);
 
     // ⭐ THIS LINE FIXES EVERYTHING
     if(res.status === 404){
@@ -506,7 +506,7 @@ async function editInvoice(customerId){
 }
 async function viewInvoiceReceipts(bookingId){
 
-  const res = await fetch(`http://localhost:3001/api/invoice-receipts/${bookingId}`);
+  const res = await fetch(`${BASE_URL}/api/invoice-receipts/${bookingId}`);
   const receipts = await res.json();
 
   let html = "<h2>📄 Invoice Receipts</h2>";
@@ -532,7 +532,7 @@ async function viewInvoiceReceipts(bookingId){
 
 window.addEventListener("load", async () => {
 
-  await fetch("http://localhost:3001/api/sync-invoice-refer");
+  await fetch(`${BASE_URL}/api/sync-invoice-refer`);
 
   loadInvoiceTable();
 
@@ -554,7 +554,7 @@ async function handleUpload(bookingId) {
 
     try {
       const res = await fetch(
-        "http://localhost:3001/api/upload-invoice-receipt",
+        `${BASE_URL}/api/upload-invoice-receipt`,
         {
           method: "POST",
           body: formData
@@ -576,7 +576,7 @@ async function handleUpload(bookingId) {
 }
 function openReceipt(fileName) {
   window.open(
-    `http://localhost:3001/uploads/${fileName}`,
+    `${BASE_URL}/uploads/${fileName}`,
     "_blank"
   );
 }
@@ -585,7 +585,7 @@ async function viewInvoice(invoiceId){
   try{
 
     const res = await fetch(
-      `http://localhost:3001/api/invoice/${invoiceId}`
+      `${BASE_URL}/api/invoice/${invoiceId}`
     );
 
     const data = await res.json();
@@ -638,7 +638,7 @@ async function viewInvoice(invoiceId){
 
 <h3>📘 Booking Receipt</h3>
 <button class="download-btn"
-  onclick="window.open('http://localhost:3001/api/download-booking-pdf/${data.customer_id}', '_blank')">
+  onclick="window.open('${BASE_URL}/api/download-booking-pdf/${data.customer_id}', '_blank')">
   Open Booking Receipt
 </button>
 
@@ -646,7 +646,7 @@ async function viewInvoice(invoiceId){
 
 <h3>💳 Payment Receipt</h3>
 <button class="download-btn"
-  onclick="window.open('http://localhost:3001/api/download-transaction-receipt/${data.customer_id}?mode=view', '_blank')">
+  onclick="window.open('${BASE_URL}/api/download-transaction-receipt/${data.customer_id}?mode=view', '_blank')">
   Open Payment Receipt
 </button>
 
@@ -655,7 +655,7 @@ async function viewInvoice(invoiceId){
 <h3>🧾 Invoice Receipt</h3>
 <button class="download-btn"
   onclick="window.open(
-  'http://localhost:3001/api/download-invoice-pdf/${data.customer_id}?type=download',
+  '${BASE_URL}/api/download-invoice-pdf/${data.customer_id}?type=download',
   '_blank'
 )"
   Download Invoice Receipt
