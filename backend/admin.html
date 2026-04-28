@@ -1065,7 +1065,7 @@ function goBack(){
 
 function loadDepartment(dept, status = null){
 
- fetch("http://localhost:3001/api/workflow-summary")
+ fetch(`${BASE_URL}/api/workflow-summary`)
   .then(res=>res.json())
   .then(res=>{
     const s = res.summary;
