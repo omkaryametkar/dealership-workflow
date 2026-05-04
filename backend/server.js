@@ -3429,11 +3429,10 @@ if(dept.toLowerCase() === "accessories"){
   result.Accessories.completed = row.completed_count;
 }
 
-/* ACCOUNTS (PENDING FROM department_tat) */
 else if(dept === "Accounts"){
-  result.Accounts.pending = row.progress_count;
- result.Accounts.delayed =
-  Number(row.delayed_count || 0) + Number(row.delayed_running_count || 0);
+  // keep delayed from department_tat if needed
+  result.Accounts.delayed =
+    Number(row.delayed_count || 0) + Number(row.delayed_running_count || 0);
 }
 
 /* OTHER DEPARTMENTS */
