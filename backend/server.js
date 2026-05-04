@@ -3601,14 +3601,35 @@ AND NOT EXISTS (
 `;
 db.query(moveToDeliverySql, ()=>{
 
-/* FINAL RESPONSE */
-res.json({
-summary: result,
-table: tableRows
-});
+  /* 🔥 ADD THIS QUERY */
+  const paymentSql = `
+  SELECT 
+    SUM(CASE WHEN status='Pending' THEN 1 ELSE 0 END) AS pending_count,
+    SUM(CASE WHEN status='Completed' THEN 1 ELSE 0 END) AS completed_count
+  FROM payment_refer
+  `;
+
+  db.query(paymentSql, (err, payRows) => {
+
+    if(err){
+      console.log("Payment Error:", err);
+    }
+
+    console.log("Payment Data:", payRows); // 🔍 DEBUG
+
+    if(payRows && payRows.length > 0){
+      result.Accounts.pending = payRows[0].pending_count || 0;
+    }
+
+    /* FINAL RESPONSE */
+    res.json({
+      summary: result,
+      table: tableRows
+    });
+
+  });
 
 });
-
 });
 });
 
