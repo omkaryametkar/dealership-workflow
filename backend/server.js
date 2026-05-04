@@ -3988,13 +3988,20 @@ app.post("/add-accessories", upload.single("receipt"), (req,res)=>{
                 return res.json({status:"error"});
               }
 
-              /* 🔹 UPDATE STATUS → COMPLETED */
               db.query(
-                `UPDATE Accessories_refer
-                 SET status='Completed'
-                 WHERE customer_id=? AND booking_id=?`,
-                [customer_id, booking_id]
-              );
+  `UPDATE accessories_refer
+   SET status='Completed'
+   WHERE TRIM(customer_id)=? AND TRIM(booking_id)=?`,
+  [customer_id, booking_id],
+  (err, result) => {
+
+    if(err){
+      console.log("UPDATE ERROR:", err);
+    } else {
+      console.log("Rows Updated:", result.affectedRows);
+    }
+  }
+);
 
               /* 🔹 END ACCESSORIES TAT */
               db.query(
