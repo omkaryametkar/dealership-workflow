@@ -3429,10 +3429,11 @@ if(dept.toLowerCase() === "accessories"){
   result.Accessories.completed = row.completed_count;
 }
 
+/* ACCOUNTS (PENDING FROM department_tat) */
 else if(dept === "Accounts"){
-  // keep delayed from department_tat if needed
-  result.Accounts.delayed =
-    Number(row.delayed_count || 0) + Number(row.delayed_running_count || 0);
+  result.Accounts.pending = row.progress_count;
+ result.Accounts.delayed =
+  Number(row.delayed_count || 0) + Number(row.delayed_running_count || 0);
 }
 
 /* OTHER DEPARTMENTS */
@@ -3601,35 +3602,14 @@ AND NOT EXISTS (
 `;
 db.query(moveToDeliverySql, ()=>{
 
-  /* 🔥 ADD THIS QUERY */
-  const paymentSql = `
-  SELECT 
-    SUM(CASE WHEN status='Pending' THEN 1 ELSE 0 END) AS pending_count,
-    SUM(CASE WHEN status='Completed' THEN 1 ELSE 0 END) AS completed_count
-  FROM payment_refer
-  `;
-
-  db.query(paymentSql, (err, payRows) => {
-
-    if(err){
-      console.log("Payment Error:", err);
-    }
-
-    console.log("Payment Data:", payRows); // 🔍 DEBUG
-
-    if(payRows && payRows.length > 0){
-      result.Accounts.pending = payRows[0].pending_count || 0;
-    }
-
-    /* FINAL RESPONSE */
-    res.json({
-      summary: result,
-      table: tableRows
-    });
-
-  });
+/* FINAL RESPONSE */
+res.json({
+summary: result,
+table: tableRows
+});
 
 });
+
 });
 });
 
@@ -3638,6 +3618,7 @@ db.query(moveToDeliverySql, ()=>{
 });
 
 });
+
 
 
 app.post("/api/start-department", (req, res) => {
