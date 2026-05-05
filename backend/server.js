@@ -3543,7 +3543,7 @@ SELECT
 customer_id,
 booking_id,
 'Accounts' AS department,
-NOW() AS start_time,
+created_at AS start_time,
 NULL AS end_time,
 NULL AS tat_days,
 'Pending' AS status
