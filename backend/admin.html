@@ -587,7 +587,7 @@
 
   <div class="inner-row">
 
-  <div onclick="loadDepartment('Accounts','In Progress')">
+  <div onclick="loadDepartment('Accounts','Pending')">
       <strong id="accountsPending">0</strong>
       <p>Pending</p>
     </div>
@@ -1124,9 +1124,22 @@ let filtered = data.filter(row =>
     
 
  if(status){
-  filtered = filtered.filter(row => 
-    row.status && row.status.toLowerCase() === status.toLowerCase()
-  );
+  filtered = filtered.filter(row => {
+
+    if(!row.status) return false;
+
+    const s = row.status.toLowerCase();
+
+    // 🔥 FIX FOR ACCOUNTS
+    if(dept === "Accounts"){
+      if(status === "In Progress"){
+        return s === "pending";   // pending = progress
+      }
+      return s === status.toLowerCase();
+    }
+
+    return s === status.toLowerCase();
+  });
 }
 
 
