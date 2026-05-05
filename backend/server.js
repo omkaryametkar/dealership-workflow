@@ -3535,6 +3535,22 @@ ELSE 'Completed'
 END AS status
 
 FROM account_status
+
+/* ✅ ADD THIS BLOCK EXACTLY HERE */
+UNION ALL
+
+/* payment_refer (Pending Payments) */
+SELECT
+customer_id,
+booking_id,
+'Accounts' AS department,
+NOW() AS start_time,
+NULL AS end_time,
+NULL AS tat_days,
+'Pending' AS status
+FROM payment_refer
+WHERE status = 'Pending'
+
 UNION ALL
 
 /* Booking Cancelled */
@@ -3556,7 +3572,6 @@ FROM cancelled_booking_refunds
 
 ORDER BY start_time DESC
 `;
-
 db.query(tableSql,[SLA,SLA],(err,tableRows)=>{
 
 if(err){
