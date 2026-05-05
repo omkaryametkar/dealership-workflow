@@ -3453,7 +3453,8 @@ else{
 const accountSql = `
 SELECT
 SUM(CASE WHEN type='Due' AND end_time IS NULL THEN 1 ELSE 0 END) AS due_count,
-SUM(CASE WHEN type='Refund' AND end_time IS NULL THEN 1 ELSE 0 END) AS refund_count
+SUM(CASE WHEN type='Refund' AND end_time IS NULL THEN 1 ELSE 0 END) AS refund_count,
+(SELECT COUNT(*) FROM payment_refer WHERE status='Pending') AS payment_pending
 FROM account_status
 `;
 
@@ -3462,6 +3463,10 @@ db.query(accountSql,(err,acc)=>{
 if(!err && acc.length>0){
   result.Accounts.due = acc[0].due_count || 0;
   result.Accounts.refund = acc[0].refund_count || 0;
+
+  // ✅ FIX HERE
+  result.Accounts.pending =
+    (result.Accounts.pending || 0) + (acc[0].payment_pending || 0);
 }
 
 
