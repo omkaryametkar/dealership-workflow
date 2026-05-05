@@ -1009,7 +1009,7 @@ function loadDashboard(){
     document.getElementById("salesDelayed").innerText = s.Sales.delayed;
     document.getElementById("salesProgress").innerText = s.Sales.progress;
 
-    document.getElementById("accountsPending").innerText = s.Accounts.pending;
+    document.getElementById("accountsPending").innerText = Number(s.Accounts.pending);
     document.getElementById("accountsDue").innerText = s.Accounts.due;
     document.getElementById("accountsRefund").innerText = s.Accounts.refund;
 
